@@ -13,7 +13,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const raiz = path.join(__dirname, '..');
-const ler = (rel) => fs.readFileSync(path.join(raiz, rel), 'utf8');
+// Quebras de linha normalizadas para LF: com core.autocrlf (padrão no Git
+// para Windows) os arquivos chegam com CRLF, mas o conteúdo é o mesmo.
+const ler = (rel) => fs.readFileSync(path.join(raiz, rel), 'utf8').replace(/\r\n/g, '\n');
 
 const nav = JSON.parse(ler('json/navegacao.json'));
 const arquivos = ['partials/header.html', 'partials/sidebar.html', 'json/usuario.json', 'json/navegacao.json'];

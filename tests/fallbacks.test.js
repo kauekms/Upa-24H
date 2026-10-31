@@ -22,7 +22,8 @@ test('Fallbacks: js/fallbacks.js está em sincronia com cada HTML/JSON (rode `np
 
   for (const rel of new Set(esperados)) {
     assert.ok(rel in fb, `fallback ausente para ${rel}`);
-    const disco = fs.readFileSync(path.join(raiz, rel), 'utf8');
+    // CRLF (git com autocrlf no Windows) e LF têm o mesmo conteúdo.
+    const disco = fs.readFileSync(path.join(raiz, rel), 'utf8').replace(/\r\n/g, '\n');
     if (rel.endsWith('.json')) assert.deepStrictEqual(fb[rel], JSON.parse(disco), `${rel} desatualizado`);
     else assert.strictEqual(fb[rel], disco, `${rel} desatualizado`);
   }
