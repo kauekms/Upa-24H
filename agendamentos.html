@@ -1,0 +1,89 @@
+<div class="page active" id="page-agendamentos">
+  <div class="page-hd">
+    <div>
+      <div class="breadcrumb">Administração › <span>Agendamentos</span></div>
+      <div class="page-title">Agendamentos</div>
+      <div class="page-sub">Gerencie e acompanhe todos os agendamentos do sistema com validação de horário e regras de antecedência.</div>
+    </div>
+    <button class="btn btn-primary" id="btn-novo-agendamento">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Novo Agendamento
+    </button>
+  </div>
+  <div class="stats-grid cols4" data-box="stats" style="margin-bottom:20px">
+    <div class="stat-card"><div class="stat-label">Total Hoje</div><div class="stat-icon ic-blue">📅</div><div class="stat-value">158</div><div class="stat-note note-muted">Agendamentos</div></div>
+    <div class="stat-card"><div class="stat-label">Confirmados</div><div class="stat-icon ic-green">✅</div><div class="stat-value">112</div><div class="stat-note note-green">70.9% do total</div></div>
+    <div class="stat-card"><div class="stat-label">Pendentes</div><div class="stat-icon ic-yellow">⏳</div><div class="stat-value">31</div><div class="stat-note note-orange">Aguardando confirmação</div></div>
+    <div class="stat-card"><div class="stat-label">Cancelados</div><div class="stat-icon ic-red">❌</div><div class="stat-value">15</div><div class="stat-note note-red">9.5% do total</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Lista de Agendamentos</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" id="btn-exportar-agendamentos">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exportar
+        </button>
+      </div>
+    </div>
+    <div style="padding:14px 20px;border-bottom:1px solid var(--border)">
+      <div class="filters-row" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+        <div class="filter-group">
+          <label>Buscar Cidadão</label>
+          <div class="search-input-wrap"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="filter-input" id="filter-agendamentos-busca" type="text" placeholder="Nome, CPF ou ID..."></div>
+        </div>
+        <div class="filter-group">
+          <label>Status</label>
+          <select class="filter-select" id="filter-agendamentos-status">
+            <option value="">Todos</option>
+            <option value="Confirmado">Confirmado</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Cancelado">Cancelado</option>
+            <option value="Remarcado">Remarcado</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Unidade</label>
+          <select class="filter-select" id="filter-agendamentos-unidade">
+            <option value="">Todas</option>
+            <option value="Unidade Central">Unidade Central</option>
+            <option value="Unidade Oeste">Unidade Oeste</option>
+            <option value="Unidade Sul">Unidade Sul</option>
+            <option value="Unidade Norte">Unidade Norte</option>
+            <option value="Unidade Leste">Unidade Leste</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Período (Início)</label>
+          <input class="filter-input" id="filter-agendamentos-data-inicio" type="date" style="min-width:130px">
+        </div>
+        <div class="filter-group">
+          <label>Período (Fim)</label>
+          <input class="filter-input" id="filter-agendamentos-data-fim" type="date" style="min-width:130px">
+        </div>
+        <div class="filter-group">
+          <label>Especialidade</label>
+          <select class="filter-select" id="filter-agendamentos-especialidade">
+            <option value="">Todas</option>
+            <option value="Clínica Geral">Clínica Geral</option>
+            <option value="Cardiologia">Cardiologia</option>
+            <option value="Ginecologia">Ginecologia</option>
+            <option value="Pediatria">Pediatria</option>
+            <option value="Ortopedia">Ortopedia</option>
+            <option value="Dermatologia">Dermatologia</option>
+            <option value="Neurologia">Neurologia</option>
+          </select>
+        </div>
+        <div class="filter-group" style="display:flex;gap:6px">
+          <button class="btn btn-primary btn-sm" id="btn-filtrar-agendamentos">Filtrar</button>
+          <button class="btn btn-outline btn-sm" id="btn-limpar-agendamentos" title="Limpar todos os filtros">Limpar</button>
+        </div>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th>Cidadão</th><th>Data / Horário</th><th>Especialidade</th><th>Médico</th><th>Unidade</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody data-box="lista-tbody"></tbody>
+    </table></div>
+    <div class="pagination"><span class="page-info" data-box="paginacao-info">Mostrando 1–7 de 158 agendamentos</span><div class="page-btns"></div></div>
+  </div>
+</div>

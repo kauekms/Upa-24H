@@ -1,0 +1,87 @@
+<div class="page active" id="page-perfil">
+  <div class="page-hd">
+    <div>
+      <div class="breadcrumb">Sistema › <span>Meu Perfil & Edição</span></div>
+      <div class="page-title">Meu Perfil & Configurações da Conta</div>
+      <div class="page-sub">Visualize suas credenciais, edite seus dados pessoais e personalize o sistema.</div>
+    </div>
+    <button class="btn btn-primary" id="btn-salvar-perfil-top">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Salvar Alterações
+    </button>
+  </div>
+
+  <!-- Header Card do Perfil -->
+  <div class="card perfil-hdr-card" style="padding:24px;margin-bottom:20px;display:flex;align-items:center;gap:20px">
+    <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:700;box-shadow:0 4px 14px rgba(10,110,189,0.3);flex-shrink:0" id="perfil-avatar-big">
+      DR
+    </div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:10px">
+        <h2 style="font-size:22px;font-weight:700;color:var(--text)" id="perfil-nome-hdr">Denilson Barrios</h2>
+        <span class="badge b-blue" id="perfil-cargo-badge">Gestor Geral</span>
+      </div>
+      <div style="font-size:13.5px;color:var(--text-muted);margin-top:4px" id="perfil-meta-hdr">
+        Matrícula: <strong class="mono" style="color:var(--text)">MAT-2026-9814</strong> · Registro/CRM: <strong class="mono" style="color:var(--text)">MS-88192-SP</strong> · Unidade: <strong style="color:var(--text)" id="perfil-unidade-hdr">Unidade Central UPA 24H</strong>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <!-- Edição das Informações Pessoais do Usuário -->
+      <div class="card card-body">
+        <h3 class="card-title" style="margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--text)">
+          ✏️ Editar Informações do Usuário
+        </h3>
+        <form id="form-edit-perfil" onsubmit="return false;">
+          <div class="config-row" style="margin-bottom:14px">
+            <div class="config-field">
+              <label>Nome Completo</label>
+              <input type="text" id="perfil-edit-nome" value="Denilson Barrios" placeholder="Nome completo">
+            </div>
+            <div class="config-field">
+              <label>E-mail Institucional</label>
+              <input type="email" id="perfil-edit-email" value="denilson.barrios@saude.gov.br" placeholder="email@saude.gov.br">
+            </div>
+          </div>
+          <div class="config-row" style="margin-bottom:14px">
+            <div class="config-field">
+              <label>Cargo / Função</label>
+              <input type="text" id="perfil-edit-cargo" value="Gestor Geral" placeholder="Cargo profissional">
+            </div>
+            <div class="config-field">
+              <label>Unidade Principal</label>
+              <input type="text" id="perfil-edit-unidade" value="Unidade Central" placeholder="Unidade de Saúde">
+            </div>
+          </div>
+          <div class="config-row" style="margin-bottom:14px">
+            <div class="config-field" style="grid-column: span 2">
+              <label>Telefone de Contato</label>
+              <input type="tel" id="perfil-edit-telefone" value="(11) 98765-4321" placeholder="(00) 00000-0000">
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px">
+            <button class="btn btn-primary" id="btn-salvar-perfil">Salvar Alterações do Perfil</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <!-- Recuperação de Senha -->
+      <div class="card card-body">
+        <h3 class="card-title" style="margin-bottom:12px;color:var(--text)">🔒 Recuperação de Senha</h3>
+        <button class="btn btn-outline btn-sm" id="btn-esqueceu-senha" style="width:100%;justify-content:center;margin-bottom:10px" onclick="document.getElementById('form-recuperar-senha').style.display='block'; this.style.display='none';">Esqueceu sua senha?</button>
+        <form id="form-recuperar-senha" onsubmit="return false;" style="display:none;">
+          <div class="form-group" style="margin-bottom:10px">
+            <label style="color:var(--text-muted)">Digite seu CPF para solicitar nova senha ao T.I</label>
+            <input type="text" id="recupera-cpf" placeholder="000.000.000-00" required>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-confirmar-recuperacao" style="width:100%;justify-content:center;margin-top:6px">Confirmar solicitação</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

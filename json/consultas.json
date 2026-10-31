@@ -1,0 +1,38 @@
+{
+  "layout": "consultas",
+  "titulo": "Consultas Médicas",
+  "breadcrumb": "Administração › Consultas",
+  "subtitulo": "Registro e acompanhamento de todas as consultas realizadas e agenda médica.",
+  "boxes": {
+    "stats": [
+      { "label": "Agendadas", "icon": "📅", "iconClass": "ic-blue", "value": "3", "note": "Consultas agendadas", "noteClass": "note-muted" },
+      { "label": "Canceladas", "icon": "❌", "iconClass": "ic-red", "value": "1", "note": "Cancelamentos", "noteClass": "note-red" },
+      { "label": "Tempo Médio de Espera", "icon": "⏱", "iconClass": "ic-purple", "value": "18 min", "note": "Fila de espera estimada", "noteClass": "note-orange" },
+      { "label": "Em Andamento", "icon": "🩺", "iconClass": "ic-teal", "value": "1", "note": "Atendimentos agora", "noteClass": "note-green" }
+    ],
+    "consultas": [
+      { "id": "CS-101", "paciente": "Luciana Ferreira", "idade": "42 anos", "especialidade": "Clínica Geral", "medico": "Dr. Manoel Joaquim", "inicio": "13:20", "duracao": "18 min", "status": "Concluída", "badge": "b-green", "cid": "J00", "data": "07/05/2026" },
+      { "id": "CS-102", "paciente": "Carlos Braga", "idade": "58 anos", "especialidade": "Cardiologia", "medico": "Dr. Arnaldo Luiz", "inicio": "13:45", "duracao": "22 min", "status": "Concluída", "badge": "b-green", "cid": "I10", "data": "07/05/2026" },
+      { "id": "CS-103", "paciente": "Ana Paula Costa", "idade": "34 anos", "especialidade": "Ginecologia", "medico": "Dra. Heloísa Rocha", "inicio": "14:00", "duracao": "—", "status": "Em Andamento", "badge": "b-blue", "cid": "—", "data": "07/05/2026" },
+      { "id": "CS-104", "paciente": "Roberto Alves", "idade": "67 anos", "especialidade": "Ortopedia", "medico": "Dr. Carlos Mendes", "inicio": "14:30", "duracao": "—", "status": "Aguardando", "badge": "b-yellow", "cid": "—", "data": "07/05/2026" },
+      { "id": "CS-105", "paciente": "Josefa Marques", "idade": "29 anos", "especialidade": "Dermatologia", "medico": "Dra. Patrícia Souza", "inicio": "15:00", "duracao": "—", "status": "Aguardando", "badge": "b-yellow", "cid": "—", "data": "07/05/2026" },
+      { "id": "CS-106", "paciente": "Maria Santos", "idade": "24 anos", "especialidade": "Pediatria", "medico": "Dra. Camila Torres", "inicio": "16:00", "duracao": "—", "status": "Agendada", "badge": "b-blue", "cid": "—", "data": "07/05/2026" },
+      { "id": "CS-107", "paciente": "Marcos Oliveira", "idade": "51 anos", "especialidade": "Cardiologia", "medico": "Dr. Arnaldo Luiz", "inicio": "16:30", "duracao": "—", "status": "Agendada", "badge": "b-blue", "cid": "—", "data": "07/05/2026" },
+      { "id": "CS-108", "paciente": "Fernanda Lima", "idade": "38 anos", "especialidade": "Dermatologia", "medico": "Dra. Patrícia Souza", "inicio": "15:30", "duracao": "—", "status": "Cancelada", "badge": "b-red", "cid": "—", "data": "07/05/2026" },
+      { "id": "CS-109", "paciente": "José Pereira", "idade": "45 anos", "especialidade": "Neurologia", "medico": "Dr. Paulo Ribeiro", "inicio": "17:00", "duracao": "—", "status": "Agendada", "badge": "b-blue", "cid": "—", "data": "07/05/2026" }
+    ],
+    "especialidades": [
+      { "nome": "Clínica Geral", "total": 34, "width": "65%", "barClass": "bar-blue" },
+      { "nome": "Cardiologia", "total": 18, "width": "35%", "color": "var(--accent)" },
+      { "nome": "Ginecologia", "total": 14, "width": "27%", "color": "var(--accent2)" },
+      { "nome": "Pediatria", "total": 11, "width": "21%", "color": "#a855f7" },
+      { "nome": "Outras", "total": 10, "width": "19%", "color": "var(--warning)" }
+    ],
+    "fila": [
+      { "posicao": 1, "ativo": true, "paciente": "Roberto Alves", "especialidade": "Ortopedia", "eta": "~15 min", "etaClass": "note-orange" },
+      { "posicao": 2, "ativo": false, "paciente": "Josefa Marques", "especialidade": "Dermatologia", "eta": "~30 min", "etaClass": "note-muted" },
+      { "posicao": 3, "ativo": false, "paciente": "Pedro Lima", "especialidade": "Clínica Geral", "eta": "~45 min", "etaClass": "note-muted" }
+    ],
+    "paginacao": { "de": 1, "ate": 9, "total": 9 }
+  }
+}

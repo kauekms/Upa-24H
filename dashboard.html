@@ -1,0 +1,68 @@
+<div class="page active" id="page-dashboard">
+  <div class="page-hd">
+    <div>
+      <div class="page-title">Visão Geral do Sistema</div>
+      <div class="page-sub">Bem-vindo, Denilson Barrios. Aqui está o resumo das atividades de saúde de hoje.</div>
+    </div>
+  </div>
+  <div class="stats-grid cols4" data-box="stats">
+    <div class="stat-card"><div class="stat-label">Total de Cidadãos</div><div class="stat-icon ic-blue">👥</div><div class="stat-value">12.482</div><div class="stat-note note-green">↑ +3% este mês</div></div>
+    <div class="stat-card"><div class="stat-label">Consultas Agendadas</div><div class="stat-icon ic-teal">📅</div><div class="stat-value">158</div><div class="stat-note note-muted">Previstas para hoje</div></div>
+    <div class="stat-card"><div class="stat-label">Exames Pendentes</div><div class="stat-icon ic-orange">📋</div><div class="stat-value">42</div><div class="stat-note note-orange">Aguardando laudo</div></div>
+    <div class="stat-card"><div class="stat-label">Taxa de Comparecimento</div><div class="stat-icon ic-red">📊</div><div class="stat-value">94.2%</div><div class="stat-bar"><div class="stat-bar-fill bar-blue" style="width:94.2%"></div></div></div>
+  </div>
+  <div class="dashboard-grid">
+    <div class="dashboard-main-col">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Agendamentos Recentes</span><a href="#" data-nav="agendamentos" style="font-size:12.5px;font-weight:600;color:var(--primary);text-decoration:none">Ver todos →</a></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Nome do Cidadão</th><th>Data</th><th>Horário</th><th>Unidade</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody data-box="agendamentos-tbody"><tr><td>Luciana Ferreira</td><td>07/05/2026</td><td><span style="font-family:'DM Mono',monospace;font-size:12px">13:20</span></td><td>Dr. Manoel Joaquim dos Reis</td><td><span class="badge b-green">Confirmado</span></td><td><button class="act-btn">⋮</button></td></tr>
+            <tr><td>Marcos Oliveira</td><td>07/05/2026</td><td><span style="font-family:'DM Mono',monospace;font-size:12px">13:20</span></td><td>Dr. Manoel Joaquim dos Reis</td><td><span class="badge b-green">Confirmado</span></td><td><button class="act-btn">⋮</button></td></tr>
+            <tr><td>Ana Paula Costa</td><td>07/05/2026</td><td><span style="font-family:'DM Mono',monospace;font-size:12px">14:00</span></td><td>Dr. Manoel Joaquim dos Reis</td><td><span class="badge b-yellow">Pendente</span></td><td><button class="act-btn">⋮</button></td></tr>
+            <tr><td>Roberto Alves</td><td>07/05/2026</td><td><span style="font-family:'DM Mono',monospace;font-size:12px">14:30</span></td><td>Dr. Manoel Joaquim dos Reis</td><td><span class="badge b-green">Confirmado</span></td><td><button class="act-btn">⋮</button></td></tr>
+            <tr><td>Fernanda Lima</td><td>07/05/2026</td><td><span style="font-family:'DM Mono',monospace;font-size:12px">15:00</span></td><td>Dr. Manoel Joaquim dos Reis</td><td><span class="badge b-red">Cancelado</span></td><td><button class="act-btn">⋮</button></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+    <div class="dashboard-side-col">
+      <div class="card calendar-card">
+        <div class="calendar-hd">
+          <span class="calendar-title" data-box="cal-mes">Maio 2026</span>
+          <div class="calendar-nav">
+            <button class="cal-nav-btn" id="cal-btn-prev" type="button" aria-label="Mês anterior">‹</button>
+            <button class="cal-nav-btn" id="cal-btn-next" type="button" aria-label="Próximo mês">›</button>
+          </div>
+        </div>
+        <div class="calendar-grid">
+          <div class="cal-dow">D</div><div class="cal-dow">S</div><div class="cal-dow">T</div><div class="cal-dow">Q</div><div class="cal-dow">Q</div><div class="cal-dow">S</div><div class="cal-dow">S</div>
+        </div>
+        <div class="calendar-grid" data-box="cal-dias"></div>
+        <div class="cal-legenda" data-box="cal-legenda"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title" style="font-size:13.5px">Próximos Atendimentos</span></div>
+        <div class="atend-list" data-box="proximos-atendimentos">
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)">
+            <div style="text-align:center;min-width:50px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted)">HOJE</div><div style="font-size:13px;font-weight:700;color:var(--primary);font-family:'DM Mono',monospace">14:00</div></div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600">Dr. Arnaldo Luiz</div><div style="font-size:11px;color:var(--text-muted)">Cardiologia · Unidade Oeste</div></div>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)">
+            <div style="text-align:center;min-width:50px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted)">HOJE</div><div style="font-size:13px;font-weight:700;color:var(--primary);font-family:'DM Mono',monospace">15:30</div></div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600">Dra. Heloísa Rocha</div><div style="font-size:11px;color:var(--text-muted)">Ginecologia · Unidade Sul</div></div>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 0">
+            <div style="text-align:center;min-width:50px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted)">AMANHÃ</div><div style="font-size:13px;font-weight:700;color:var(--primary);font-family:'DM Mono',monospace">09:00</div></div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600">Lab Exames S/A</div><div style="font-size:11px;color:var(--text-muted)">Hemograma Completo</div></div>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" id="btn-dash-agendar" type="button">Agendar Novo Atendimento</button>
+      </div>
+    </div>
+  </div>
+</div>
+

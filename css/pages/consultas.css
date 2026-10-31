@@ -1,0 +1,13 @@
+.consultas-grid{display:grid;grid-template-columns:1fr 300px;gap:16px}
+.consultas-side{display:flex;flex-direction:column;gap:16px}
+.especialidade-item{margin-bottom:12px}
+.especialidade-item:last-child{margin-bottom:0}
+.espec-hd{display:flex;justify-content:space-between;margin-bottom:5px}
+.espec-name{font-size:12.5px;font-weight:500}
+.espec-count{font-size:12px;font-weight:700}
+.fila-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.fila-item:last-child{border-bottom:none}
+.fila-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0}
+.fila-num.active{background:var(--primary)}
+.fila-num.wait{background:#6b7a8d}
+.fila-eta{font-size:11px;font-weight:600}

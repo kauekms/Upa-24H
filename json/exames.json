@@ -1,0 +1,24 @@
+{
+  "layout": "exames",
+  "titulo": "Exames Laboratoriais",
+  "breadcrumb": "Administração › Exames",
+  "subtitulo": "Acompanhe solicitações, laudos e resultados dos exames.",
+  "boxes": {
+    "stats": [
+      { "label": "Solicitados", "icon": "🔬", "iconClass": "ic-blue", "value": "2", "note": "Novos pedidos", "noteClass": "note-muted" },
+      { "label": "Em andamento", "icon": "📋", "iconClass": "ic-orange", "value": "2", "note": "Em análise no laboratório", "noteClass": "note-orange" },
+      { "label": "Concluídos", "icon": "✔", "iconClass": "ic-green", "value": "3", "note": "Laudos prontos", "noteClass": "note-green" },
+      { "label": "Atrasados", "icon": "🚨", "iconClass": "ic-red", "value": "1", "note": "Prazo previsto expirado", "noteClass": "note-red" }
+    ],
+    "lista": [
+      { "id": "#EX-8821", "paciente": "Carlos Braga", "cpf": "123.456.789-00", "pid": "P-4521", "tipo": "Hemograma Completo", "solicitante": "Dr. Arnaldo Luiz", "unidade": "UBS Centro", "data": "07/05/2026", "horario": "07:30", "dataPrevista": "09/05/2026", "prioridade": "Urgente", "priorBadge": "b-red", "status": "Solicitado", "statusBadge": "b-yellow" },
+      { "id": "#EX-8822", "paciente": "Luciana Ferreira", "cpf": "987.654.321-00", "pid": "P-4318", "tipo": "Glicemia em Jejum", "solicitante": "Dr. Manoel Joaquim", "unidade": "Unidade Central", "data": "07/05/2026", "horario": "08:00", "dataPrevista": "08/05/2026", "prioridade": "Normal", "priorBadge": "b-gray", "status": "Em andamento", "statusBadge": "b-blue" },
+      { "id": "#EX-8819", "paciente": "Maria Santos", "cpf": "112.233.445-00", "pid": "P-3892", "tipo": "Raio-X Tórax", "solicitante": "Dr. Paulo Ribeiro", "unidade": "Unidade Sul", "data": "05/05/2026", "horario": "09:15", "dataPrevista": "06/05/2026", "prioridade": "Normal", "priorBadge": "b-gray", "status": "Concluído", "statusBadge": "b-green", "download": true },
+      { "id": "#EX-8815", "paciente": "José Pereira", "cpf": "789.123.456-00", "pid": "P-4102", "tipo": "Tomografia Crânio", "solicitante": "Dr. Paulo Ribeiro", "unidade": "Unidade Central", "data": "01/05/2026", "horario": "10:30", "dataPrevista": "03/05/2026", "prioridade": "Média", "priorBadge": "b-orange", "status": "Em andamento", "statusBadge": "b-blue" },
+      { "id": "#EX-8810", "paciente": "Roberto Alves", "cpf": "321.654.987-00", "pid": "P-3761", "tipo": "Ultrassom Abdominal", "solicitante": "Dr. Carlos Mendes", "unidade": "Unidade Norte", "data": "04/05/2026", "horario": "11:00", "dataPrevista": "05/05/2026", "prioridade": "Normal", "priorBadge": "b-gray", "status": "Concluído", "statusBadge": "b-green", "download": true },
+      { "id": "#EX-8807", "paciente": "Ana Paula Costa", "cpf": "456.789.123-00", "pid": "P-4409", "tipo": "ECG", "solicitante": "Dra. Heloísa Rocha", "unidade": "Unidade Oeste", "data": "07/05/2026", "horario": "14:00", "dataPrevista": "08/05/2026", "prioridade": "Urgente", "priorBadge": "b-red", "status": "Solicitado", "statusBadge": "b-yellow" },
+      { "id": "#EX-8805", "paciente": "Carlos Braga", "cpf": "123.456.789-00", "pid": "P-4521", "tipo": "Colesterol Total e Frações", "solicitante": "Dr. Arnaldo Luiz", "unidade": "UBS Centro", "data": "20/04/2026", "horario": "08:30", "dataPrevista": "22/04/2026", "prioridade": "Normal", "priorBadge": "b-gray", "status": "Concluído", "statusBadge": "b-green", "download": true }
+    ],
+    "paginacao": { "de": 1, "ate": 4, "total": 7, "label": "exames" }
+  }
+}

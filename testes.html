@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UPA 24H – Suíte de Testes Automatizados (Auditoria & Exames)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #38bdf8;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #0ea5e9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 30px 20px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .title-wrap h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .title-wrap p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #0f172a;
+    }
+    .btn-primary:hover {
+      background: #7dd3fc;
+    }
+    .btn-outline {
+      border-color: var(--border);
+      background: transparent;
+      color: var(--text);
+    }
+    .btn-outline:hover {
+      background: var(--card);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      font-family: 'DM Mono', monospace;
+    }
+    .val-total { color: var(--text); }
+    .val-pass { color: var(--success); }
+    .val-fail { color: var(--danger); }
+    .val-time { color: var(--info); font-size: 22px; }
+
+    .test-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .test-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      transition: border-color 0.2s;
+    }
+    .test-item:hover {
+      border-color: #475569;
+    }
+    .test-item.pass {
+      border-left: 4px solid var(--success);
+    }
+    .test-item.fail {
+      border-left: 4px solid var(--danger);
+      background: rgba(239, 68, 68, 0.08);
+    }
+    .test-info {
+      flex: 1;
+    }
+    .test-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .test-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .test-err {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11.5px;
+      color: #fca5a5;
+      white-space: pre-wrap;
+    }
+    .badge-test {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .b-pass {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .b-fail {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-wrap">
+        <h1>Suíte de Testes Automatizados – UPA 24H</h1>
+        <p>Verificação de Requisitos Não Funcionais (Auditoria, Segurança RBAC e Exames Laboratoriais)</p>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="executarTestes()">▶ Executar Testes Novamente</button>
+        <a href="index.html" class="btn btn-outline">← Voltar ao Sistema</a>
+      </div>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total de Testes</span>
+        <span class="stat-value val-total" id="stat-total">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Aprovados</span>
+        <span class="stat-value val-pass" id="stat-pass">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Reprovados</span>
+        <span class="stat-value val-fail" id="stat-fail">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Tempo Total</span>
+        <span class="stat-value val-time" id="stat-time">0 ms</span>
+      </div>
+    </div>
+
+    <div class="test-list" id="test-list">
+      <div style="text-align:center;padding:40px;color:var(--muted)">Executando testes automatizados no navegador...</div>
+    </div>
+  </div>
+
+  <!-- Scripts do Sistema -->
+  <script src="js/config/permissoes.js"></script>
+  <script src="js/api/crypto.js"></script>
+  <script src="js/api/usuarios.js"></script>
+  <script src="js/api/auditoria.js"></script>
+  <script src="js/api/exames.js"></script>
+  <script src="js/api/auth.js"></script>
+  <script src="js/render.js"></script>
+
+  <!-- Script Executor de Testes Puro JS -->
+  <script>
+    // Mock do App para simular controle de rotas
+    window.App = window.App || {
+      usuario: null,
+      checkLogin(pageId) {
+        if (!this.usuario) {
+          if (['logs', 'cadastro-usuarios', 'unidades', 'configuracoes'].includes(pageId)) {
+            window.AuditoriaService.registrar(
+              'Anônimo',
+              'Tentativa de Acesso Negado',
+              `Tentativa de acesso não autenticado à área restrita "${pageId}".`,
+              'Aviso',
+              'SEGURANÇA'
+            );
+          }
+          return false;
+        }
+        if (pageId === 'logs' || pageId === 'cadastro-usuarios') {
+          const perfil = this.usuario?.perfil;
+          if (perfil !== 'Administrador') {
+            window.AuditoriaService.registrar(
+              this.usuario?.nome || 'Usuário',
+              'Acesso Negado à Área Administrativa',
+              `Usuário com perfil "${perfil}" tentou acessar "${pageId}" sem permissão de Administrador.`,
+              'Aviso',
+              'SEGURANÇA'
+            );
+            return false;
+          }
+        }
+        return true;
+      }
+    };
+
+    const testes = [
+      {
+        id: 'T01',
+        nome: 'Auditoria: Registro centralizado de eventos',
+        desc: 'Registra usuário, ação, data/hora, tipo e descrição com sincronização.',
+        fn: async () => {
+          AuditoriaService.clear();
+          const log = AuditoriaService.registrar('Dr. Roberto', 'Solicitação de Exame', 'Exame Raio-X Tórax solicitado', 'Informação', 'EXAMES');
+          if (!log || !log.id) throw new Error('ID do log não foi gerado.');
+          if (log.usuario !== 'Dr. Roberto') throw new Error(`Usuário esperado "Dr. Roberto", recebido "${log.usuario}"`);
+          if (log.tipo !== 'Informação') throw new Error(`Tipo esperado "Informação", recebido "${log.tipo}"`);
+        }
+      },
+      {
+        id: 'T02',
+        nome: 'Auditoria: Normalização dos 4 tipos oficiais',
+        desc: 'Garante conversão consistente para Erro, Aviso, Informação e Acesso.',
+        fn: async () => {
+          if (AuditoriaService.normalizarTipo('ERRO') !== 'Erro') throw new Error('Falha ao normalizar Erro');
+          if (AuditoriaService.normalizarTipo('warning') !== 'Aviso') throw new Error('Falha ao normalizar Aviso');
+          if (AuditoriaService.normalizarTipo('login') !== 'Acesso') throw new Error('Falha ao normalizar Acesso');
+          if (AuditoriaService.normalizarTipo('INFO') !== 'Informação') throw new Error('Falha ao normalizar Informação');
+        }
+      },
+      {
+        id: 'T03',
+        nome: 'Segurança: Bloqueio de acesso não autenticado a áreas restritas',
+        desc: 'Usuário sem login é bloqueado de acessar a tela de logs e gera registro de Aviso.',
+        fn: async () => {
+          AuditoriaService.clear();
+          App.usuario = null;
+          const permit = App.checkLogin('logs');
+          if (permit !== false) throw new Error('Acesso a logs deveria ser bloqueado para usuários não logados.');
+          const logs = AuditoriaService.getAll();
+          if (logs.length !== 1) throw new Error(`Esperado 1 log de auditoria, encontrados ${logs.length}`);
+          if (logs[0].tipo !== 'Aviso') throw new Error(`Tipo esperado "Aviso", encontrado "${logs[0].tipo}"`);
+        }
+      },
+      {
+        id: 'T04',
+        nome: 'Segurança: Bloqueio de usuário não Administrador na tela de logs',
+        desc: 'Cidadão e Profissional da Saúde não acessam logs e tentativas são registradas como Aviso.',
+        fn: async () => {
+          AuditoriaService.clear();
+          App.usuario = { nome: 'Maria Santos', perfil: 'Cidadão' };
+          if (App.checkLogin('logs') !== false) throw new Error('Cidadão não pode acessar tela de logs');
+
+          App.usuario = { nome: 'Dr. Roberto', perfil: 'Profissional da Saúde' };
+          if (App.checkLogin('logs') !== false) throw new Error('Profissional da Saúde não pode acessar tela de logs');
+
+          const logs = AuditoriaService.getAll();
+          if (logs.length !== 2) throw new Error(`Esperados 2 logs de acesso negado, encontrados ${logs.length}`);
+          if (logs[0].tipo !== 'Aviso' || logs[1].tipo !== 'Aviso') throw new Error('Todos os logs de acesso negado devem ser do tipo Aviso');
+
+          App.usuario = { nome: 'Denilson Gestor', perfil: 'Administrador' };
+          if (App.checkLogin('logs') !== true) throw new Error('Administrador deve ter acesso liberado');
+        }
+      },
+      {
+        id: 'T05',
+        nome: 'Exames: POST /exames - Validação de campos obrigatórios',
+        desc: 'Requer paciente, tipo de exame, data e unidade, retornando HTTP 400 em caso de ausência.',
+        fn: async () => {
+          const r1 = await ExamesAPI.solicitar({ tipo: 'ECG', data: '10/05/2026', unidade: 'UPA Central' });
+          if (r1.status !== 400) throw new Error(`Esperado status 400 para paciente ausente, recebido ${r1.status}`);
+
+          const r2 = await ExamesAPI.solicitar({ paciente: 'Ana', data: '10/05/2026', unidade: 'UPA Central' });
+          if (r2.status !== 400) throw new Error(`Esperado status 400 para tipo ausente, recebido ${r2.status}`);
+
+          const r3 = await ExamesAPI.solicitar({ paciente: 'Ana', tipo: 'ECG', unidade: 'UPA Central' });
+          if (r3.status !== 400) throw new Error(`Esperado status 400 para data ausente, recebido ${r3.status}`);
+
+          const r4 = await ExamesAPI.solicitar({ paciente: 'Ana', tipo: 'ECG', data: '10/05/2026' });
+          if (r4.status !== 400) throw new Error(`Esperado status 400 para unidade ausente, recebido ${r4.status}`);
+        }
+      },
+      {
+        id: 'T06',
+        nome: 'Exames: POST /exames - Solicitação com sucesso e auditoria',
+        desc: 'Retorna HTTP 201 e gera automaticamente registro de auditoria com usuário, ação e data/hora.',
+        fn: async () => {
+          AuditoriaService.clear();
+          ExamesAPI.persist([]);
+          const res = await ExamesAPI.solicitar({
+            paciente: 'Carlos Drummond',
+            tipo: 'Hemograma Completo',
+            data: '15/06/2026',
+            horario: '08:30',
+            unidade: 'UPA 24h Central'
+          }, 'Dr. Roberto Admin');
+
+          if (res.status !== 201) throw new Error(`Esperado status 201, recebido ${res.status}`);
+          const logs = AuditoriaService.getAll();
+          if (logs.length !== 1) throw new Error('A solicitação de exame não gerou log de auditoria');
+          if (logs[0].usuario !== 'Dr. Roberto Admin') throw new Error(`Usuário no log incorreto: ${logs[0].usuario}`);
+          if (logs[0].acao !== 'Solicitação de Exame') throw new Error(`Ação no log incorreta: ${logs[0].acao}`);
+        }
+      },
+      {
+        id: 'T07',
+        nome: 'Exames: PUT /exames/:id - Exames concluídos são imutáveis',
+        desc: 'Bloqueia alterações em exames concluídos retornando HTTP 400 (conforme Caso de Uso 3).',
+        fn: async () => {
+          ExamesAPI.persist([{
+            id: 'EX-CONCLUIDO-TESTE',
+            paciente: 'Maria Santos',
+            tipo: 'ECG',
+            data: '01/01/2026',
+            unidade: 'UPA Central',
+            status: 'Concluído'
+          }]);
+
+          const res = await ExamesAPI.alterar('EX-CONCLUIDO-TESTE', { horario: '10:00' });
+          if (res.status !== 400) throw new Error(`Esperado status 400 ao tentar alterar exame concluído, recebido ${res.status}`);
+          if (!res.body?.error?.toLowerCase().includes('concluído')) throw new Error('Mensagem de erro não menciona imutabilidade de exame concluído.');
+        }
+      },
+      {
+        id: 'T08',
+        nome: 'Exames: PUT /exames/:id - Alteração válida e auditoria',
+        desc: 'Atualiza dados de exame pendente, retorna HTTP 200 e gera log de auditoria.',
+        fn: async () => {
+          AuditoriaService.clear();
+          ExamesAPI.persist([{
+            id: 'EX-EDIT-TESTE',
+            paciente: 'Lucas Silva',
+            tipo: 'Glicemia',
+            data: '20/06/2026',
+            unidade: 'UBS Vila Nova',
+            status: 'Solicitado'
+          }]);
+
+          const res = await ExamesAPI.alterar('EX-EDIT-TESTE', { status: 'Em andamento', unidade: 'UPA 24h Central' }, 'Enf. Juliana');
+          if (res.status !== 200) throw new Error(`Esperado status 200, recebido ${res.status}`);
+          const logs = AuditoriaService.getAll();
+          if (logs.length !== 1) throw new Error('Alteração de exame não gerou log de auditoria');
+          if (logs[0].usuario !== 'Enf. Juliana') throw new Error(`Usuário incorreto no log: ${logs[0].usuario}`);
+        }
+      },
+      {
+        id: 'T09',
+        nome: 'Exames: Indicadores dinâmicos calculados a partir dos dados',
+        desc: 'Calcula Solicitados, Em andamento, Concluídos e Atrasados.',
+        fn: async () => {
+          ExamesAPI.persist([
+            { id: '1', paciente: 'P1', tipo: 'T1', data: '01/01/2026', unidade: 'U1', status: 'Solicitado', dataPrevista: '2099-12-31' },
+            { id: '2', paciente: 'P2', tipo: 'T2', data: '01/01/2026', unidade: 'U1', status: 'Em andamento', dataPrevista: '2099-12-31' },
+            { id: '3', paciente: 'P3', tipo: 'T3', data: '01/01/2026', unidade: 'U1', status: 'Concluído', dataPrevista: '2020-01-01' },
+            { id: '4', paciente: 'P4', tipo: 'T4', data: '01/01/2026', unidade: 'U1', status: 'Solicitado', dataPrevista: '2020-01-01' }
+          ]);
+
+          const ind = ExamesAPI.getIndicadores();
+          if (ind.solicitados !== 2) throw new Error(`Esperado 2 solicitados, obtido ${ind.solicitados}`);
+          if (ind.emAndamento !== 1) throw new Error(`Esperado 1 em andamento, obtido ${ind.emAndamento}`);
+          if (ind.concluidos !== 1) throw new Error(`Esperado 1 concluído, obtido ${ind.concluidos}`);
+          if (ind.atrasados !== 1) throw new Error(`Esperado 1 atrasado, obtido ${ind.atrasados}`);
+        }
+      },
+      {
+        id: 'T10',
+        nome: 'Exames: Regra de exame Atrasado',
+        desc: 'Exame é atrasado se a data prevista passou e o status não é Concluído.',
+        fn: async () => {
+          if (!ExamesAPI.isAtrasado({ status: 'Solicitado', dataPrevista: '01/01/2020' })) {
+            throw new Error('Exame solicitado com data prevista no passado deve ser considerado Atrasado.');
+          }
+          if (ExamesAPI.isAtrasado({ status: 'Concluído', dataPrevista: '01/01/2020' })) {
+            throw new Error('Exame concluído NUNCA pode ser considerado Atrasado.');
+          }
+          if (ExamesAPI.isAtrasado({ status: 'Solicitado', dataPrevista: '31/12/2099' })) {
+            throw new Error('Exame com data prevista futura não deve ser Atrasado.');
+          }
+        }
+      },
+      {
+        id: 'T11',
+        nome: 'Exames: Histórico do paciente',
+        desc: 'Recupera todos os exames vinculados ao paciente por nome, CPF ou identificador.',
+        fn: async () => {
+          ExamesAPI.persist([
+            { id: 'EX-H1', paciente: 'Lucas Andrade', cpf: '111.111.111-11', tipo: 'Hemograma Completo', data: '10/01/2026', unidade: 'U1', status: 'Concluído' },
+            { id: 'EX-H2', paciente: 'Lucas Andrade', cpf: '111.111.111-11', tipo: 'Glicemia', data: '15/02/2026', unidade: 'U1', status: 'Solicitado' },
+            { id: 'EX-H3', paciente: 'Outra Pessoa', cpf: '222.222.222-22', tipo: 'Raio-X', data: '20/02/2026', unidade: 'U1', status: 'Concluído' }
+          ]);
+
+          const hist = ExamesAPI.getHistoricoPaciente('Lucas Andrade');
+          if (hist.length !== 2) throw new Error(`Esperados 2 exames no histórico, encontrados ${hist.length}`);
+        }
+      },
+      {
+        id: 'T12',
+        nome: 'Auditoria: Filtros combináveis com precisão',
+        desc: 'Filtra registros por tipo, usuário e período de forma combinada.',
+        fn: async () => {
+          AuditoriaService.clear();
+          AuditoriaService.registrar('Admin Carlos', 'Login', 'Acesso inicial', 'Acesso', 'AUTH');
+          AuditoriaService.registrar('Dr. Silva', 'Prescrição', 'Receita emitida', 'Informação', 'CONSULTAS');
+          AuditoriaService.registrar('Admin Carlos', 'Bloqueio', 'Tentativa sem perfil', 'Aviso', 'SEGURANÇA');
+
+          const avisos = AuditoriaService.listar({ tipo: 'Aviso' });
+          if (avisos.length !== 1) throw new Error(`Esperado 1 aviso, obtido ${avisos.length}`);
+
+          const doCarlos = AuditoriaService.listar({ usuario: 'Carlos' });
+          if (doCarlos.length !== 2) throw new Error(`Esperados 2 registros do Carlos, obtido ${doCarlos.length}`);
+
+          const comb = AuditoriaService.listar({ usuario: 'Carlos', tipo: 'Aviso' });
+          if (comb.length !== 1) throw new Error(`Esperado 1 registro combinado, obtido ${comb.length}`);
+        }
+      },
+      {
+        id: 'T13',
+        nome: 'Segurança: Resiliência contra hash corrompido (sem erro de atob)',
+        desc: 'Garante que hashes malformados não quebrem o login e que o perfil Administrador se recupere perfeitamente.',
+        fn: async () => {
+          const resHash = await window.Crypto.verificarSenha('admin', 'pbkdf2:100000:admin:invalido');
+          if (resHash !== false) throw new Error('Hash inválido deveria retornar false com segurança');
+
+          const usuarios = window.UsuariosAPI.getAll();
+          const adm = usuarios.find(u => u.perfil === 'Administrador' || u.cpf === '111.444.777-35');
+          adm.senha = 'pbkdf2:100000:salt-corrompido:hash-corrompido';
+          window.UsuariosAPI.persist(usuarios);
+
+          const login = await window.AuthAPI.processarLogin({ identificador: adm.cpf, senha: 'admin' });
+          if (login.status !== 200 || !login.body?.success) {
+            throw new Error('Falha no login com auto-recuperação de hash corrompido do Administrador');
+          }
+        }
+      },
+      {
+        id: 'T14',
+        nome: 'Permissões RBAC: Acesso à tela de Unidades de Saúde',
+        desc: 'Verifica se apenas Administrador e Profissional da Saúde possuem acesso à tela de unidades.',
+        fn: async () => {
+          if (!window.Permissoes.perfilPodeAcessarPagina('Administrador', 'unidades')) {
+            throw new Error('Administrador deveria ter acesso a unidades');
+          }
+          if (!window.Permissoes.perfilPodeAcessarPagina('Profissional da Saúde', 'unidades')) {
+            throw new Error('Profissional da Saúde deveria ter acesso a unidades');
+          }
+          if (window.Permissoes.perfilPodeAcessarPagina('Recepção', 'unidades')) {
+            throw new Error('Recepção NÃO deveria ter acesso a unidades');
+          }
+          if (window.Permissoes.perfilPodeAcessarPagina('Cidadão', 'unidades')) {
+            throw new Error('Cidadão NÃO deveria ter acesso a unidades');
+          }
+        }
+      },
+      {
+        id: 'T15',
+        nome: 'Render: renderUnidades monta a tabela de unidades e paginação',
+        desc: 'Valida se o método Render.renderUnidades existe e processa a tabela sem erros em tempo de execução.',
+        fn: async () => {
+          if (typeof window.Render?.renderUnidades !== 'function') {
+            throw new Error('Render.renderUnidades não está implementado');
+          }
+          const div = document.createElement('div');
+          div.innerHTML = '<table><tbody data-box="unidades-tbody"></tbody></table><div class="pagination"><span class="page-info"></span><div class="page-btns"></div></div>';
+          const mockData = {
+            boxes: {
+              lista: [
+                { nome: 'Hospital Teste', id: '999', tipo: 'Hospital', endereco: 'Rua Teste', capacidade: '100 leitos', status: 'Operacional' }
+              ]
+            }
+          };
+          window.Render.renderUnidades(div, mockData);
+          const tbody = div.querySelector('[data-box="unidades-tbody"]');
+          if (!tbody.innerHTML.includes('Hospital Teste')) {
+            throw new Error('renderUnidades não preencheu o tbody corretamente');
+          }
+        }
+      }
+    ];
+
+    async function executarTestes() {
+      const container = document.getElementById('test-list');
+      container.innerHTML = '';
+
+      let passCount = 0;
+      let failCount = 0;
+      const inicio = performance.now();
+
+      for (const t of testes) {
+        let pass = true;
+        let erroMsg = '';
+        try {
+          await t.fn();
+          passCount++;
+        } catch (err) {
+          pass = false;
+          failCount++;
+          erroMsg = err.message || String(err);
+        }
+
+        const div = document.createElement('div');
+        div.className = `test-item ${pass ? 'pass' : 'fail'}`;
+        div.innerHTML = `
+          <div class="test-info">
+            <div class="test-title">
+              <span>${pass ? '✔' : '✖'}</span>
+              <span>${t.id} – ${t.nome}</span>
+            </div>
+            <div class="test-desc">${t.desc}</div>
+            ${!pass ? `<div class="test-err">${erroMsg}</div>` : ''}
+          </div>
+          <div>
+            <span class="badge-test ${pass ? 'b-pass' : 'b-fail'}">${pass ? 'APROVADO' : 'REPROVADO'}</span>
+          </div>
+        `;
+        container.appendChild(div);
+      }
+
+      const fim = performance.now();
+      const tempoTotal = Math.round(fim - inicio);
+
+      document.getElementById('stat-total').textContent = testes.length;
+      document.getElementById('stat-pass').textContent = passCount;
+      document.getElementById('stat-fail').textContent = failCount;
+      document.getElementById('stat-time').textContent = `${tempoTotal} ms`;
+    }
+
+    document.addEventListener('DOMContentLoaded', executarTestes);
+  </script>
+</body>
+</html>

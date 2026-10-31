@@ -1,0 +1,37 @@
+{
+  "layout": "unidades",
+  "titulo": "Unidades de Saúde",
+  "breadcrumb": "Administração › Gestão de Unidades",
+  "subtitulo": "Gerencie a infraestrutura e capacidade das unidades federativas.",
+  "boxes": {
+    "stats": [
+      { "label": "Total de Unidades", "icon": "🏥", "iconClass": "ic-red", "value": "42", "note": "Unidades cadastradas", "noteClass": "note-muted" },
+      { "label": "Operacionais", "icon": "✅", "iconClass": "ic-green", "value": "38", "note": "Funcionando normalmente", "noteClass": "note-green" },
+      { "label": "Em Manutenção", "icon": "🔧", "iconClass": "ic-orange", "value": "04", "note": "Temporariamente inativas", "noteClass": "note-orange" },
+      { "label": "Capacidade Total", "icon": "👥", "iconClass": "ic-blue", "value": "12.5k", "note": "Leitos disponíveis", "noteClass": "note-muted" }
+    ],
+    "lista": [
+      { "nome": "Hospital Central Municipal", "id": "102938", "icone": "🏥", "icoBg": "#fef2f2", "tipo": "Hospital", "tipoBg": "#fef2f2", "tipoColor": "#b91c1c", "endereco": "Av. Brasil, 1500 – Centro", "capacidade": "500 leitos", "ocupacao": 85, "barClass": "bar-blue", "status": "Operacional", "statusColor": "success" },
+      { "nome": "UPA 24h Jardim Sul", "id": "102945", "icone": "🚑", "icoBg": "#fef2f2", "tipo": "UPA", "tipoBg": "#fef9c3", "tipoColor": "#92400e", "endereco": "Rua das Palmeiras, 45 – Jd. Sul", "capacidade": "80 atend/h", "ocupacao": 40, "barColor": "var(--success)", "status": "Operacional", "statusColor": "success" },
+      { "nome": "UBS Vila Nova", "id": "102952", "icone": "🏪", "icoBg": "#e8f2fb", "tipo": "UBS", "tipoBg": "#e8f2fb", "tipoColor": "#1d4ed8", "endereco": "Praça da Matriz, s/n – Vila Nova", "capacidade": "Indisponível · Reforma", "indisponivel": true, "status": "Manutenção", "statusColor": "danger" },
+      { "nome": "Hospital Regional Norte", "id": "102960", "icone": "🏥", "icoBg": "#dcfce7", "tipo": "Hospital", "tipoBg": "#fef2f2", "tipoColor": "#b91c1c", "endereco": "Rod. BR-153, km 12 – Zona Norte", "capacidade": "320 leitos", "ocupacao": 73, "barClass": "bar-orange", "status": "Operacional", "statusColor": "success" },
+      { "nome": "AME Especialidades Leste", "id": "102971", "icone": "🏪", "icoBg": "#f3e8ff", "tipo": "AME", "tipoBg": "#f3e8ff", "tipoColor": "#7e22ce", "endereco": "Av. Independência, 800 – Leste", "capacidade": "150 cons/dia", "ocupacao": 60, "barClass": "bar-blue", "status": "Operacional", "statusColor": "success" }
+    ],
+    "distribuicao": [
+      { "tipo": "Hospital", "total": 8, "cor": "#ef4444" },
+      { "tipo": "UPA", "total": 12, "cor": "#f59e0b" },
+      { "tipo": "UBS", "total": 18, "cor": "#0a6ebd" },
+      { "tipo": "AME", "total": 4, "cor": "#a855f7" }
+    ],
+    "alertas": [
+      { "tipo": "red", "titulo": "UBS Vila Nova offline", "descricao": "Em reforma desde 01/05" },
+      { "tipo": "warn", "titulo": "Hospital Norte 73% cheio", "descricao": "Capacidade em atenção" }
+    ],
+    "insumos": [
+      { "nome": "Vacinas COVID-19", "icone": "💉", "pct": 82, "color": "success" },
+      { "nome": "Estoque de Sangue", "icone": "🩸", "pct": 64, "color": "warning" },
+      { "nome": "EPIs Críticos", "icone": "🦺", "pct": 12, "color": "danger" }
+    ],
+    "paginacao": { "de": 1, "ate": 5, "total": 42 }
+  }
+}

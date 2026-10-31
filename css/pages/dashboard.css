@@ -1,0 +1,31 @@
+.dashboard-grid{display:grid;grid-template-columns:1fr 280px;gap:16px}
+.dashboard-main-col{display:flex;flex-direction:column;gap:16px}
+.dashboard-side-col{display:flex;flex-direction:column;gap:16px}
+.calendar-card{padding:16px 18px}
+.calendar-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.calendar-title{font-weight:600;font-size:14px}
+.calendar-nav{display:flex;gap:4px}
+.cal-nav-btn{background:none;border:1px solid var(--border);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.cal-dow{font-size:10px;font-weight:700;color:var(--text-muted);padding:3px}
+.cal-day{position:relative;font-size:12px;padding:6px 2px;border-radius:6px;cursor:pointer}
+.cal-day:hover{background:var(--bg)}
+.cal-day.muted{color:var(--text-light);cursor:default}
+.cal-day.muted:hover{background:none}
+.cal-day.today{background:#e8f2fb;color:var(--primary);font-weight:600}
+.cal-day.selected{background:var(--primary);color:#fff;font-weight:700}
+.cal-day.has-evento::after{content:'';position:absolute;left:50%;bottom:2px;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.cal-day.selected.has-evento::after{background:#fff}
+.cal-legenda{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:10.5px;color:var(--text-muted)}
+.cal-legenda-item{display:flex;align-items:center;gap:5px}
+.cal-legenda-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block}
+.atend-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.atend-item:last-child{border-bottom:none}
+.atend-time-box{text-align:center;min-width:50px}
+.atend-label{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted)}
+.atend-time{font-size:13px;font-weight:700;color:var(--primary);font-family:'DM Mono',monospace}
+.atend-info{flex:1}
+.atend-name{font-size:13px;font-weight:600}
+.atend-desc{font-size:11px;color:var(--text-muted)}
+.atend-list{padding:0 16px 8px}
+.btn-block{width:calc(100% - 32px);margin:4px 16px 14px;justify-content:center;display:flex}

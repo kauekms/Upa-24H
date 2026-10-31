@@ -1,0 +1,16 @@
+{
+  "name": "upa-24h",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão UPA 24H - Saúde Pública Digital",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "upa",
+    "saude-publica",
+    "rbac",
+    "auth"
+  ],
+  "author": "",
+  "license": "ISC"
+}
