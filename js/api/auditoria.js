@@ -380,47 +380,52 @@ const AuditoriaService = (() => {
     persist([]);
   }
 
+  let interceptado = false;
   function registrarInterceptor() {
-    if (typeof window === 'undefined' || !window.fetch) return;
+    if (typeof window === 'undefined' || !window.fetch || interceptado) return;
+    interceptado = true;
     const originalFetch = window.fetch;
 
     window.fetch = async function (url, options = {}) {
-      const urlStr = typeof url === 'string' ? url : url.url;
-      const method = (options.method || 'GET').toUpperCase();
+      const Http = window.Http;
+      const rota = Http ? Http.caminho(url) : '';
+      if (rota !== '/logs' && rota !== '/logs/indicadores') return originalFetch(url, options);
 
-      if (urlStr.includes('/logs/indicadores') && method === 'GET') {
-        const u = new URL(urlStr, 'http://localhost');
-        const filtros = Object.fromEntries(u.searchParams.entries());
-        const res = getIndicadores(filtros);
-        return new Response(JSON.stringify({ success: true, indicadores: res }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
+      const method = Http.metodo(options);
+
+      // Leitura da auditoria é área administrativa (RNF de segurança).
+      if (method === 'GET') {
+        const acesso = Http.autorizar(options, { acao: 'ver_logs' });
+        if (!acesso.permitido) {
+          registrar({
+            usuario: acesso.user?.nome || 'Anônimo',
+            acao: 'Tentativa de Acesso Negado',
+            tipo: 'Aviso',
+            modulo: 'SEGURANÇA',
+            descricao: `Consulta à auditoria negada: ${acesso.error}`
+          });
+          return Http.negado(acesso);
+        }
+        const filtros = Http.parametros(url);
+        if (rota === '/logs/indicadores') {
+          return Http.json(200, { success: true, indicadores: getIndicadores(filtros) });
+        }
+        const lista = listar(filtros);
+        // `listar` devolve um array com propriedades extras; JSON.stringify
+        // descartava `success/total/data`, então a resposta virava só o array.
+        return Http.json(200, { success: true, total: lista.length, data: Array.from(lista) });
       }
 
-      if (urlStr.includes('/logs') && method === 'GET') {
-        const u = new URL(urlStr, 'http://localhost');
-        const filtros = Object.fromEntries(u.searchParams.entries());
-        const res = listar(filtros);
-        return new Response(JSON.stringify(res), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
+      if (method === 'POST' && rota === '/logs') {
+        const acesso = Http.autorizar(options);
+        if (!acesso.permitido) return Http.negado(acesso);
+        const body = Http.corpo(options);
+        // O autor do registro é sempre o usuário da sessão.
+        const novo = registrar({ ...body, usuario: acesso.user?.nome });
+        return Http.json(201, { success: true, log: novo });
       }
 
-      if (urlStr.includes('/logs') && method === 'POST') {
-        let body = {};
-        try {
-          body = typeof options.body === 'string' ? JSON.parse(options.body) : (options.body || {});
-        } catch {}
-        const novo = registrar(body);
-        return new Response(JSON.stringify({ success: true, log: novo }), {
-          status: 201,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-
-      return originalFetch(url, options);
+      return Http.json(405, { success: false, error: 'Método não permitido.' });
     };
   }
 

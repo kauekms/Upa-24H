@@ -219,15 +219,19 @@ const ExamesAPI = (() => {
 
   /**
    * Data de referência para teste de prazo "já passou".
-   * Considera 07/05/2026 como base padrão quando o sistema opera com a base de dados de demonstração de maio/2026.
+   * Antes, fora de maio/2026 a referência era congelada em 07/05/2026 (data
+   * da base de demonstração) — exames realmente vencidos nunca apareciam como
+   * atrasados. Agora a referência padrão é sempre o momento atual.
    */
   function getDataReferencia(dataRef) {
     if (dataRef instanceof Date) return dataRef;
     if (typeof dataRef === 'string') return parseData(dataRef) || new Date();
-    const agora = new Date();
-    // Se o sistema estiver operando no contexto da simulação em maio/2026:
-    if (agora.getFullYear() === 2026 && agora.getMonth() === 4) return agora;
-    return new Date(2026, 4, 7, 23, 59, 59); // 07/05/2026
+    return new Date();
+  }
+
+  function gerarNovoId(lista) {
+    const maior = lista.reduce((m, e) => Math.max(m, parseInt(String(e.id || '').replace(/\D/g, ''), 10) || 0), 8829);
+    return `#EX-${maior + 1}`;
   }
 
   /**
@@ -367,7 +371,9 @@ const ExamesAPI = (() => {
 
     const prioridadeFinal = prioridade || 'Normal';
     const priorBadge = prioridadeFinal === 'Urgente' ? 'b-red' : prioridadeFinal === 'Média' ? 'b-orange' : 'b-gray';
-    const newId = `#EX-${Math.floor(8830 + Math.random() * 800)}`;
+    // Antes era aleatório entre #EX-8830 e #EX-9629: com algumas centenas de
+    // exames, dois pedidos acabavam com o mesmo ID.
+    const newId = gerarNovoId(getAll());
 
     const novoExame = {
       id: newId,
@@ -522,8 +528,9 @@ const ExamesAPI = (() => {
    */
   function listarExames(filtros = {}) {
     const lista = getAll();
-    const { status, dataInicio, dataFim, busca, q, paciente } = filtros;
+    const { status, dataInicio, dataFim, busca, q, paciente, cpf } = filtros;
 
+    const cpfFiltro = cpf ? String(cpf).replace(/\D/g, '') || '-' : '';
     const stFiltro = status ? String(status).trim().toLowerCase() : '';
     const buscaFiltro = (busca || q) ? String(busca || q).trim().toLowerCase() : '';
     const pacFiltro = paciente ? String(paciente).trim().toLowerCase() : '';
@@ -531,6 +538,9 @@ const ExamesAPI = (() => {
     const dtFim = dataFim ? parseData(dataFim) : null;
 
     const filtrados = lista.filter(item => {
+      // 0. Filtro exato por CPF (usado no recorte "só meus exames" do Cidadão)
+      if (cpfFiltro && String(item.cpf || '').replace(/\D/g, '') !== cpfFiltro) return false;
+
       // 1. Filtro por status (inclui a regra dinâmica de "Atrasado")
       if (stFiltro) {
         if (stFiltro === 'atrasado') {
@@ -667,84 +677,61 @@ const ExamesAPI = (() => {
   /**
    * Interceptador de chamadas fetch para endpoints mockados de exames.
    */
+  let interceptado = false;
   function registrarInterceptor() {
-    if (typeof window === 'undefined' || !window.fetch) return;
+    if (typeof window === 'undefined' || !window.fetch || interceptado) return;
+    interceptado = true;
     const originalFetch = window.fetch;
 
     window.fetch = async function (url, options = {}) {
-      const urlStr = typeof url === 'string' ? url : url.url;
-      const method = (options.method || 'GET').toUpperCase();
+      const Http = window.Http;
+      const rota = Http ? Http.caminho(url) : '';
+      if (rota !== '/exames' && !rota.startsWith('/exames/')) return originalFetch(url, options);
 
-      // GET /exames/indicadores
-      if (urlStr.includes('/exames/indicadores') && method === 'GET') {
-        const u = new URL(urlStr, 'http://localhost');
-        const filtros = Object.fromEntries(u.searchParams.entries());
-        const res = getIndicadores(filtros);
-        return new Response(JSON.stringify({ success: true, indicadores: res }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
+      const method = Http.metodo(options);
+      const acesso = Http.autorizar(options);
+      if (!acesso.permitido) return Http.negado(acesso);
+      const ehCidadao = Http.ehCidadao(acesso.perfil);
+      const operador = acesso.user?.nome || 'sistema';
 
-      // GET /exames/historico
-      if (urlStr.includes('/exames/historico') && method === 'GET') {
-        const u = new URL(urlStr, 'http://localhost');
-        const paciente = u.searchParams.get('paciente') || '';
-        const res = getHistoricoPaciente(paciente);
-        return new Response(JSON.stringify(res), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
+      if (method === 'GET') {
+        const filtros = Http.parametros(url);
+        // Cidadão só enxerga os próprios exames (filtro por CPF da sessão).
+        if (ehCidadao) filtros.cpf = acesso.user?.cpf || '-';
 
-      // POST /exames (Solicitar exame)
-      if (urlStr.endsWith('/exames') && method === 'POST') {
-        let body = {};
-        try {
-          body = typeof options.body === 'string' ? JSON.parse(options.body) : (options.body || {});
-        } catch {}
-        const op = window.App?.usuario?.nome || 'Recepção';
-        const res = await solicitarExame(body, op);
-        return new Response(JSON.stringify(res.body), {
-          status: res.status,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-
-      // PUT /exames/:id ou PUT /exames
-      if (urlStr.includes('/exames') && method === 'PUT') {
-        let body = {};
-        try {
-          body = typeof options.body === 'string' ? JSON.parse(options.body) : (options.body || {});
-        } catch {}
-
-        // Extrai o ID da URL se presente (/exames/:id)
-        let id = body.id;
-        const match = urlStr.match(/\/exames\/([^/?#]+)/);
-        if (match && match[1] && match[1] !== 'indicadores' && match[1] !== 'historico') {
-          id = decodeURIComponent(match[1]);
+        if (rota === '/exames/indicadores') {
+          return Http.json(200, { success: true, indicadores: getIndicadores(filtros) });
         }
-
-        const op = window.App?.usuario?.nome || 'Recepção';
-        const res = await alterarExame(id, body, op);
-        return new Response(JSON.stringify(res.body), {
-          status: res.status,
-          headers: { 'Content-Type': 'application/json' }
-        });
+        if (rota === '/exames/historico') {
+          const alvo = ehCidadao ? (acesso.user?.cpf || '-') : (filtros.paciente || '');
+          const hist = getHistoricoPaciente(alvo);
+          return Http.json(200, { success: hist.success, paciente: alvo, total: hist.length, historico: Array.from(hist) });
+        }
+        if (rota === '/exames') {
+          const lista = listarExames(filtros);
+          return Http.json(200, { success: true, total: lista.length, data: Array.from(lista) });
+        }
+        return Http.json(404, { success: false, error: 'Rota não encontrada.' });
       }
 
-      // GET /exames (Listar com suporte a filtros)
-      if (urlStr.includes('/exames') && method === 'GET') {
-        const u = new URL(urlStr, 'http://localhost');
-        const filtros = Object.fromEntries(u.searchParams.entries());
-        const res = listarExames(filtros);
-        return new Response(JSON.stringify(res), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
+      // Solicitar/alterar exames é atribuição da equipe (Casos de Uso 2 e 3).
+      const gestao = Http.autorizar(options, { acao: 'gerenciar_atendimentos' });
+      if (!gestao.permitido) return Http.negado(gestao);
+      const body = Http.corpo(options);
+
+      if (method === 'POST' && rota === '/exames') {
+        const res = await solicitarExame(body, operador);
+        return Http.json(res.status, res.body);
       }
 
-      return originalFetch(url, options);
+      if (method === 'PUT') {
+        const match = rota.match(/^\/exames\/([^/]+)$/);
+        const id = match ? decodeURIComponent(match[1]) : body.id;
+        const res = await alterarExame(id, body, operador);
+        return Http.json(res.status, res.body);
+      }
+
+      return Http.json(405, { success: false, error: 'Método não permitido.' });
     };
   }
 

@@ -46,6 +46,7 @@ const ConsultasAPI = (() => {
         idade: '42 anos',
         especialidade: 'Clínica Geral',
         medico: 'Dr. Manoel Joaquim',
+        chegada: '13:02',
         inicio: '13:20',
         duracao: '18 min',
         status: 'Concluída',
@@ -59,6 +60,7 @@ const ConsultasAPI = (() => {
         idade: '58 anos',
         especialidade: 'Cardiologia',
         medico: 'Dr. Arnaldo Luiz',
+        chegada: '13:31',
         inicio: '13:45',
         duracao: '22 min',
         status: 'Concluída',
@@ -72,6 +74,7 @@ const ConsultasAPI = (() => {
         idade: '34 anos',
         especialidade: 'Ginecologia',
         medico: 'Dra. Heloísa Rocha',
+        chegada: '13:35',
         inicio: '14:00',
         duracao: '—',
         status: 'Em Andamento',
@@ -144,6 +147,19 @@ const ConsultasAPI = (() => {
         cid: '—',
         data: '07/05/2026',
         motivoCancelamento: 'Desistência do cidadão com antecedência'
+      },
+      {
+        id: 'CS-110',
+        paciente: 'Rafael Antunes',
+        idade: '33 anos',
+        especialidade: 'Clínica Geral',
+        medico: 'Dr. Manoel Joaquim',
+        inicio: '12:40',
+        duracao: '—',
+        status: 'Não Compareceu',
+        badge: 'b-gray',
+        cid: '—',
+        data: '07/05/2026'
       },
       {
         id: 'CS-109',
@@ -228,6 +244,32 @@ const ConsultasAPI = (() => {
     };
   }
 
+  function minutosDoDia(hhmm) {
+    const m = String(hhmm || '').match(/^(\d{1,2}):(\d{2})/);
+    return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : null;
+  }
+
+  /**
+   * Tempo de espera = horário de início do atendimento − horário de chegada
+   * do paciente, só para consultas já iniciadas (Em Andamento/Concluída).
+   * Antes este indicador fazia a média da DURAÇÃO das consultas (com um
+   * "ajuste" pela fila e piso fixo de 12 min) — media outra coisa.
+   */
+  function calcularTempoMedioEspera(lista) {
+    const esperas = lista
+      .filter(c => c.status === 'Em Andamento' || c.status === 'Concluída')
+      .map(c => {
+        const chegada = minutosDoDia(c.chegada);
+        const inicio = minutosDoDia(c.inicio);
+        return chegada == null || inicio == null ? null : inicio - chegada;
+      })
+      .filter(n => n != null && n >= 0);
+    if (esperas.length === 0) return 0;
+    return Math.round(esperas.reduce((a, b) => a + b, 0) / esperas.length);
+  }
+
+  const STATUS_CONSULTA = ['Agendada', 'Aguardando', 'Em Andamento', 'Concluída', 'Cancelada', 'Não Compareceu'];
+
   /**
    * GET /consultas/indicadores
    * Requisito: "indicadores (agendadas, canceladas, tempo médio de espera)"
@@ -242,21 +284,7 @@ const ConsultasAPI = (() => {
     const emAndamento = lista.filter(c => c.status === 'Em Andamento').length;
     const aguardando = lista.filter(c => c.status === 'Aguardando').length;
 
-    // Cálculo dinâmico do Tempo Médio de Espera:
-    // Baseado nas durações de atendimento e fila de pacientes
-    const duracoes = lista
-      .map(c => parseInt(String(c.duracao || '').replace(/\D/g, ''), 10))
-      .filter(n => !isNaN(n) && n > 0);
-
-    let tempoMedioMinutos = 18; // Padrão base
-    if (duracoes.length > 0) {
-      tempoMedioMinutos = Math.round(duracoes.reduce((a, b) => a + b, 0) / duracoes.length);
-    }
-    if (aguardando > 0) {
-      // Ajusta conforme a fila de espera real
-      tempoMedioMinutos = Math.max(12, Math.round(tempoMedioMinutos * 0.9 + aguardando * 2));
-    }
-
+    const tempoMedioMinutos = calcularTempoMedioEspera(lista);
     const tempoMedioEsperaFormatado = `${tempoMedioMinutos} min`;
 
     return {
@@ -324,7 +352,7 @@ const ConsultasAPI = (() => {
         indicadores: {
           agendadas: agendadas.length + agendamentosFuturos.length,
           canceladas: canceladas.length,
-          tempoMedioEspera: '18 min',
+          tempoMedioEspera: `${calcularTempoMedioEspera(consultasMedico)} min`,
           concluidas: concluidas.length,
           emAndamento: emAndamento.length,
           aguardando: aguardandoFila.length
@@ -345,7 +373,26 @@ const ConsultasAPI = (() => {
     if (!medico) return { status: 400, body: { success: false, error: 'O médico responsável é obrigatório.' } };
 
     const lista = getAll();
-    const novoId = `CS-${100 + lista.length + 1}`;
+    // Antes: CS-(100 + tamanho da lista) — repetia IDs quando algum registro era removido.
+    const maiorId = lista.reduce((m, c) => Math.max(m, parseInt(String(c.id || '').replace(/\D/g, ''), 10) || 0), 100);
+    const novoId = `CS-${maiorId + 1}`;
+
+    // Vínculo com a agenda do profissional: o mesmo médico não atende duas
+    // consultas no mesmo dia e horário.
+    const dataConsulta = dados.data ? String(dados.data).trim() : new Date().toLocaleDateString('pt-BR');
+    const horario = inicio || '14:00';
+    const conflito = lista.find(c =>
+      c.status !== 'Cancelada' &&
+      String(c.medico || '').trim().toLowerCase() === String(medico).trim().toLowerCase() &&
+      (c.data || '') === dataConsulta &&
+      c.inicio === horario
+    );
+    if (conflito) {
+      return {
+        status: 409,
+        body: { success: false, codigoRegra: 'CONFLITO_AGENDA', error: `Horário indisponível: ${conflito.medico} já tem consulta em ${dataConsulta} às ${horario}.` }
+      };
+    }
 
     const novaConsulta = {
       id: novoId,
@@ -353,12 +400,14 @@ const ConsultasAPI = (() => {
       idade: idade ? `${idade} anos` : '35 anos',
       especialidade: especialidade.trim(),
       medico: medico.trim(),
-      inicio: inicio || '14:00',
+      inicio: horario,
+      chegada: dados.chegada || undefined,
+      cpf: dados.cpf || undefined,
       duracao: duracao || '—',
       status: status || 'Agendada',
       badge: status === 'Concluída' ? 'b-green' : (status === 'Em Andamento' ? 'b-blue' : (status === 'Cancelada' ? 'b-red' : 'b-yellow')),
       cid: cid || '—',
-      data: new Date().toLocaleDateString('pt-BR')
+      data: dataConsulta
     };
 
     lista.push(novaConsulta);
@@ -386,6 +435,9 @@ const ConsultasAPI = (() => {
    */
   async function atualizarStatus(pacienteOuId, novoStatus, dadosExtras = {}) {
     if (!pacienteOuId) return { status: 400, body: { success: false, error: 'Identificador da consulta é obrigatório.' } };
+    if (!STATUS_CONSULTA.includes(novoStatus)) {
+      return { status: 400, body: { success: false, error: `Status inválido. Use: ${STATUS_CONSULTA.join(', ')}.` } };
+    }
 
     const lista = getAll();
     const idStr = String(pacienteOuId).toLowerCase().trim();
@@ -431,56 +483,66 @@ const ConsultasAPI = (() => {
     const originalFetch = window.fetch.bind(window);
 
     window.fetch = async (url, options = {}) => {
-      const urlStr = typeof url === 'string' ? url : (url && url.url) || '';
-      const method = (options.method || 'GET').toUpperCase();
+      const Http = window.Http;
+      const rota = Http ? Http.caminho(url) : '';
+      if (rota !== '/consultas' && !rota.startsWith('/consultas/')) return originalFetch(url, options);
 
-      // GET /consultas/agenda
-      if (urlStr.includes('/consultas/agenda') && method === 'GET') {
-        const u = new URL(urlStr, 'http://localhost');
-        const medico = u.searchParams.get('medico');
-        const res = getAgendaProfissional(medico);
-        return new Response(JSON.stringify(res), { status: 200, headers: { 'Content-Type': 'application/json' } });
-      }
+      const method = Http.metodo(options);
+      const acesso = Http.autorizar(options);
+      if (!acesso.permitido) return Http.negado(acesso);
+      const ehCidadao = Http.ehCidadao(acesso.perfil);
+      const operador = acesso.user?.nome || 'Sistema';
 
-      // GET /consultas/indicadores
-      if (urlStr.includes('/consultas/indicadores') && method === 'GET') {
-        const u = new URL(urlStr, 'http://localhost');
-        const filtros = Object.fromEntries(u.searchParams.entries());
-        const res = getIndicadores(filtros);
-        return new Response(JSON.stringify(res), { status: 200, headers: { 'Content-Type': 'application/json' } });
-      }
+      // Consultas antigas não guardam CPF, só o nome do paciente.
+      const doCidadao = (c) => {
+        const cpf = Http.cpfLimpo(acesso.user?.cpf);
+        if (c.cpf) return Http.cpfLimpo(c.cpf) === cpf;
+        return String(c.paciente || '').trim().toLowerCase() === String(acesso.user?.nome || '').trim().toLowerCase();
+      };
 
-      // POST /consultas
-      if (urlStr.endsWith('/consultas') && method === 'POST') {
-        try {
-          const body = JSON.parse(options.body || '{}');
-          const res = await criarConsulta(body);
-          return new Response(JSON.stringify(res.body), { status: res.status, headers: { 'Content-Type': 'application/json' } });
-        } catch (err) {
-          return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      try {
+        if (method === 'GET') {
+          const filtros = Http.parametros(url);
+          if (rota === '/consultas/agenda') {
+            if (ehCidadao) return Http.json(403, { success: false, error: 'Acesso negado: a agenda do profissional é restrita à equipe.' });
+            const medico = filtros.medico || (acesso.perfil === 'Profissional da Saúde' ? acesso.user?.nome : '');
+            return Http.json(200, getAgendaProfissional(medico));
+          }
+          if (rota === '/consultas/indicadores') {
+            if (ehCidadao) return Http.json(403, { success: false, error: 'Acesso negado: indicadores são restritos à equipe.' });
+            return Http.json(200, getIndicadores(filtros));
+          }
+          if (rota === '/consultas') {
+            const res = listarConsultas(filtros);
+            if (ehCidadao) {
+              res.data = res.data.filter(doCidadao);
+              res.total = res.data.length;
+            }
+            return Http.json(200, res);
+          }
+          return Http.json(404, { success: false, error: 'Rota não encontrada.' });
         }
-      }
 
-      // PUT /consultas/status
-      if (urlStr.includes('/consultas/status') && (method === 'PUT' || method === 'POST')) {
-        try {
-          const body = JSON.parse(options.body || '{}');
+        const body = Http.corpo(options);
+
+        if (rota === '/consultas' && method === 'POST') {
+          const gestao = Http.autorizar(options, { acao: 'gerenciar_atendimentos' });
+          if (!gestao.permitido) return Http.negado(gestao);
+          const res = await criarConsulta(body, operador);
+          return Http.json(res.status, res.body);
+        }
+
+        if (rota === '/consultas/status' && (method === 'PUT' || method === 'POST')) {
+          const perm = Http.autorizar(options, { acao: 'atualizar_consultas' });
+          if (!perm.permitido) return Http.negado(perm);
           const res = await atualizarStatus(body.id || body.paciente, body.status, body);
-          return new Response(JSON.stringify(res.body), { status: res.status, headers: { 'Content-Type': 'application/json' } });
-        } catch (err) {
-          return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+          return Http.json(res.status, res.body);
         }
-      }
 
-      // GET /consultas
-      if (urlStr.includes('/consultas') && method === 'GET') {
-        const u = new URL(urlStr, 'http://localhost');
-        const filtros = Object.fromEntries(u.searchParams.entries());
-        const res = listarConsultas(filtros);
-        return new Response(JSON.stringify(res), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        return Http.json(405, { success: false, error: 'Método não permitido.' });
+      } catch (err) {
+        return Http.json(500, { success: false, error: err.message });
       }
-
-      return originalFetch(url, options);
     };
   }
 

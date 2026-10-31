@@ -4,6 +4,7 @@
     { "id": "agendamentos", "label": "Agendamentos", "arquivo": "agendamentos.html", "css": [], "json": "json/agendamentos.json" },
     { "id": "consultas", "label": "Consultas", "arquivo": "consultas.html", "css": ["css/pages/consultas.css"], "json": "json/consultas.json" },
     { "id": "exames", "label": "Exames", "arquivo": "exames.html", "css": [], "json": "json/exames.json" },
+    { "id": "vacinacao", "label": "Vacinação", "arquivo": "vacinacao.html", "css": ["css/pages/vacinacao.css"], "json": "json/vacinacao.json" },
     { "id": "unidades", "label": "Unidades de Saúde", "arquivo": "unidades.html", "css": ["css/pages/unidades.css"], "json": "json/unidades.json" },
     { "id": "logs", "label": "Logs de Sistema", "arquivo": "logs.html", "css": ["css/pages/logs.css"], "json": "json/logs.json" },
     { "id": "cadastro-usuarios", "label": "Cadastro de Usuários", "arquivo": "cadastro-usuarios.html", "css": ["css/pages/configuracoes.css"], "json": "json/usuario.json" },

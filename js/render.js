@@ -3,9 +3,22 @@
  */
 const PAGE_SIZE_PADRAO = 4;
 
+// Escapa dados antes de irem para innerHTML. Sem isto, um nome cadastrado
+// como `<img src=x onerror=...>` executava script para quem abrisse a lista.
+function esc(valor) {
+  return String(valor == null ? '' : valor)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const Render = {
+  esc,
+
   badge(status, cls) {
-    return `<span class="badge ${cls}">${status}</span>`;
+    return `<span class="badge ${esc(cls)}">${esc(status)}</span>`;
   },
 
   // Estado da página atual de cada tabela paginada (por pageId). Antes, os
@@ -87,15 +100,15 @@ const Render = {
     if (!container || !stats) return;
     container.innerHTML = stats.map(s => {
       const note = s.note
-        ? `<div class="stat-note ${s.noteClass || 'note-muted'}">${s.note}</div>`
+        ? `<div class="stat-note ${s.noteClass || 'note-muted'}">${esc(s.note)}</div>`
         : '';
       const bar = s.bar != null
-        ? `<div class="stat-bar"><div class="stat-bar-fill ${s.barClass || 'bar-blue'}" style="width:${s.bar}%"></div></div>`
+        ? `<div class="stat-bar"><div class="stat-bar-fill ${s.barClass || 'bar-blue'}" style="width:${esc(s.bar)}%"></div></div>`
         : '';
       return `<div class="stat-card">
-        <div class="stat-label">${s.label}</div>
-        <div class="stat-icon ${s.iconClass}">${s.icon}</div>
-        <div class="stat-value">${s.value}</div>
+        <div class="stat-label">${esc(s.label)}</div>
+        <div class="stat-icon ${esc(s.iconClass)}">${esc(s.icon)}</div>
+        <div class="stat-value">${esc(s.value)}</div>
         ${note}${bar}
       </div>`;
     }).join('');
@@ -224,7 +237,7 @@ const Render = {
     const diasEl = root.querySelector('[data-box="cal-dias"]');
     if (diasEl) {
       diasEl.innerHTML = celulas.map(c => {
-        if (c.outroMes) return `<div class="cal-day muted">${c.dia}</div>`;
+        if (c.outroMes) return `<div class="cal-day muted">${esc(c.dia)}</div>`;
 
         const chave = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(c.dia).padStart(2, '0')}`;
         const ehHoje = ano === hoje.getFullYear() && mes === hoje.getMonth() && c.dia === hoje.getDate();
@@ -236,7 +249,7 @@ const Render = {
         else if (ehHoje) classes.push('today');
         if (temAgendamento) classes.push('has-evento');
 
-        return `<div class="${classes.join(' ')}" data-cal-dia="${chave}">${c.dia}</div>`;
+        return `<div class="${classes.join(' ')}" data-cal-dia="${chave}">${esc(c.dia)}</div>`;
       }).join('');
 
       diasEl.querySelectorAll('[data-cal-dia]').forEach(el => {
@@ -288,31 +301,41 @@ const Render = {
     if (tbody && recentes) {
       tbody.innerHTML = recentes.map((a, idx) => `
         <tr>
-          <td class="fw-600">${a.paciente || a.nome}</td><td>${a.data}</td>
-          <td><span class="mono">${a.horario}</span></td>
-          <td>${a.unidade}</td>
+          <td class="fw-600">${esc(a.paciente || a.nome)}</td><td>${esc(a.data)}</td>
+          <td><span class="mono">${esc(a.horario)}</span></td>
+          <td>${esc(a.unidade)}</td>
           <td>${this.badge(a.status, a.badge)}</td>
           <td><button class="act-btn" data-action="view-agendamento" data-id="${a.id || ('#' + (10291 + idx))}" type="button">Ver</button></td>
         </tr>`).join('');
     }
 
-    // O bloco de "Alertas Importantes" foi removido do Dashboard (não fazia
-    // parte do escopo atual, que ficou focado só em agendamentos, consultas
-    // e exames) — não há mais nada para desenhar aqui.
+    // Card de Alertas Importantes — calculado pelo DashboardAPI a partir dos
+    // dados reais (estoque de vacinas, exames atrasados, unidades, segurança).
+    const alertas = b.alertas || [];
+    const alertasEl = root.querySelector('[data-box="alertas-dashboard"]');
+    if (alertasEl) alertasEl.innerHTML = this.alertasHtml(alertas, 'Nenhum alerta importante no momento.');
+    const countEl = root.querySelector('[data-box="alertas-count"]');
+    if (countEl) {
+      countEl.textContent = String(alertas.length);
+      countEl.style.display = alertas.length ? '' : 'none';
+    }
 
     this.renderCalendario(root);
 
     const atend = root.querySelector('[data-box="proximos-atendimentos"]');
-    if (atend && b.proximosAtendimentos) {
-      atend.innerHTML = b.proximosAtendimentos.map((p, i) => `
-        <div class="atend-item" data-action="click-atendimento" data-nome="${p.nome}" style="cursor:pointer">
+    const proximos = b.proximosAtendimentos || [];
+    if (atend) {
+      atend.innerHTML = proximos.length === 0
+        ? '<div style="padding:14px 0;color:var(--text-muted);font-size:12.5px">Nenhum atendimento futuro agendado.</div>'
+        : proximos.map((p, i) => `
+        <div class="atend-item" data-action="click-atendimento" data-nome="${esc(p.nome)}" style="cursor:pointer">
           <div class="atend-time-box">
-            <div class="atend-label">${p.periodo}</div>
-            <div class="atend-time">${p.horario}</div>
+            <div class="atend-label">${esc(p.periodo)}</div>
+            <div class="atend-time">${esc(p.horario)}</div>
           </div>
           <div class="atend-info">
-            <div class="atend-name">${p.nome}</div>
-            <div class="atend-desc">${p.descricao}</div>
+            <div class="atend-name">${esc(p.nome)}</div>
+            <div class="atend-desc">${esc(p.descricao)}</div>
           </div>
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
         </div>`).join('');
@@ -338,32 +361,32 @@ const Render = {
     const isCidadao = u?.perfil === 'Cidadão' || u?.perfil === 'Paciente' || u?.cargo === 'Cidadão' || u?.cargo === 'Paciente';
 
     tbody.innerHTML = itens.map(r => {
-      let botoesAcao = `<button class="act-btn" data-action="view-agendamento" data-id="${r.id}" type="button">Ver</button>`;
+      let botoesAcao = `<button class="act-btn" data-action="view-agendamento" data-id="${esc(r.id)}" type="button">Ver</button>`;
 
       if (r.status !== 'Cancelado') {
         if (podeGerenciar) {
           // Administrador / Recepção
           const btnConfirmar = (r.status === 'Pendente' || r.status === 'Remarcado')
-            ? `<button class="act-btn" style="color:var(--success)" data-action="confirm-agendamento" data-id="${r.id}" type="button">Confirmar</button>`
+            ? `<button class="act-btn" style="color:var(--success)" data-action="confirm-agendamento" data-id="${esc(r.id)}" type="button">Confirmar</button>`
             : '';
           botoesAcao = `
             ${btnConfirmar}
-            <button class="act-btn" style="color:var(--primary)" data-action="edit-agendamento" data-id="${r.id}" type="button">Alterar</button>
-            <button class="act-btn" style="color:var(--danger)" data-action="cancel-agendamento" data-id="${r.id}" type="button">Cancelar</button>
-            <button class="act-btn" data-action="view-agendamento" data-id="${r.id}" type="button">Ver</button>
+            <button class="act-btn" style="color:var(--primary)" data-action="edit-agendamento" data-id="${esc(r.id)}" type="button">Alterar</button>
+            <button class="act-btn" style="color:var(--danger)" data-action="cancel-agendamento" data-id="${esc(r.id)}" type="button">Cancelar</button>
+            <button class="act-btn" data-action="view-agendamento" data-id="${esc(r.id)}" type="button">Ver</button>
           `;
         } else if (isCidadao) {
           const p = (r.data || '').split('/');
           const isPast = p.length === 3 ? (new Date(`${p[2]}-${p[1]}-${p[0]}T00:00:00`) < new Date(new Date().setHours(0,0,0,0))) : false;
           if (!isPast) {
             const btnConfirmar = (r.status === 'Pendente')
-              ? `<button class="act-btn" style="color:var(--success)" data-action="confirm-agendamento" data-id="${r.id}" type="button">Confirmar</button>`
+              ? `<button class="act-btn" style="color:var(--success)" data-action="confirm-agendamento" data-id="${esc(r.id)}" type="button">Confirmar</button>`
               : '';
             botoesAcao = `
               ${btnConfirmar}
-              <button class="act-btn" style="color:var(--primary)" data-action="edit-agendamento" data-id="${r.id}" type="button">Alterar</button>
-              <button class="act-btn" style="color:var(--danger)" data-action="cancel-agendamento" data-id="${r.id}" type="button">Cancelar</button>
-              <button class="act-btn" data-action="view-agendamento" data-id="${r.id}" type="button">Ver</button>
+              <button class="act-btn" style="color:var(--primary)" data-action="edit-agendamento" data-id="${esc(r.id)}" type="button">Alterar</button>
+              <button class="act-btn" style="color:var(--danger)" data-action="cancel-agendamento" data-id="${esc(r.id)}" type="button">Cancelar</button>
+              <button class="act-btn" data-action="view-agendamento" data-id="${esc(r.id)}" type="button">Ver</button>
             `;
           }
         }
@@ -371,10 +394,10 @@ const Render = {
 
       return `
         <tr>
-          <td class="mono text-muted-sm">${r.id}</td>
-          <td><div class="fw-600">${r.paciente}</div><div class="text-muted-sm">CPF: ${r.cpf}</div></td>
-          <td><div>${r.data}</div><div class="mono" style="color:var(--primary)">${r.horario}</div></td>
-          <td>${r.especialidade}</td><td>${r.medico}</td><td>${r.unidade}</td>
+          <td class="mono text-muted-sm">${esc(r.id)}</td>
+          <td><div class="fw-600">${esc(r.paciente)}</div><div class="text-muted-sm">CPF: ${esc(r.cpf)}</div></td>
+          <td><div>${esc(r.data)}</div><div class="mono" style="color:var(--primary)">${esc(r.horario)}</div></td>
+          <td>${esc(r.especialidade)}</td><td>${esc(r.medico)}</td><td>${esc(r.unidade)}</td>
           <td>${this.badge(r.status, r.badge)}</td>
           <td><div style="display:flex;gap:4px;flex-wrap:wrap">${botoesAcao}</div></td>
         </tr>`;
@@ -398,15 +421,15 @@ const Render = {
     const { itens, atual, totalPaginas, total } = this.paginar(listaCompleta, 'consultas');
     tbody.innerHTML = itens.map(c => `
       <tr>
-        <td><div class="fw-600">${c.paciente}</div><div class="text-muted-sm">${c.idade || ''}</div></td>
-        <td>${c.especialidade}</td><td>${c.medico}</td>
-        <td class="mono">${c.inicio}</td><td class="mono">${c.duracao}</td>
+        <td><div class="fw-600">${esc(c.paciente)}</div><div class="text-muted-sm">${esc(c.idade || '')}</div></td>
+        <td>${esc(c.especialidade)}</td><td>${esc(c.medico)}</td>
+        <td class="mono">${esc(c.inicio)}</td><td class="mono">${esc(c.duracao)}</td>
         <td>${this.badge(c.status, c.badge)}</td>
-        <td><span class="mono text-muted-sm">${c.cid || '—'}</span></td>
+        <td><span class="mono text-muted-sm">${esc(c.cid || '—')}</span></td>
         <td>
           <div style="display:flex;gap:4px">
-            <button class="act-btn" style="color:var(--primary)" data-action="view-agenda-medico" data-medico="${c.medico}" type="button" title="Ver Agenda deste Profissional">Agenda</button>
-            <button class="act-btn" data-action="view-consulta" data-paciente="${c.paciente}" type="button">Ver</button>
+            <button class="act-btn" style="color:var(--primary)" data-action="view-agenda-medico" data-medico="${esc(c.medico)}" type="button" title="Ver Agenda deste Profissional">Agenda</button>
+            <button class="act-btn" data-action="view-consulta" data-paciente="${esc(c.paciente)}" type="button">Ver</button>
           </div>
         </td>
       </tr>`).join('');
@@ -438,35 +461,35 @@ const Render = {
 
         // Exames concluídos não devem poder ser alterados
         const btnAlterar = (!isConcluido && podeGerenciar)
-          ? `<button class="act-btn" data-action="edit-exame" data-id="${e.id}" type="button" title="Alterar Exame">Alterar</button>`
+          ? `<button class="act-btn" data-action="edit-exame" data-id="${esc(e.id)}" type="button" title="Alterar Exame">Alterar</button>`
           : '';
 
-        const btnHistorico = `<button class="act-btn" data-action="historico-exames" data-paciente="${e.paciente}" data-cpf="${e.cpf || ''}" type="button" title="Histórico do Paciente">Histórico</button>`;
+        const btnHistorico = `<button class="act-btn" data-action="historico-exames" data-paciente="${esc(e.paciente)}" data-cpf="${esc(e.cpf || '')}" type="button" title="Histórico do Paciente">Histórico</button>`;
 
         const btnDownload = (e.download || isConcluido)
-          ? `<button class="act-btn" data-action="download-exame" data-id="${e.id}" type="button" style="color:var(--primary)">Download</button>`
+          ? `<button class="act-btn" data-action="download-exame" data-id="${esc(e.id)}" type="button" style="color:var(--primary)">Download</button>`
           : (!podeGerenciar
               ? `<span style="color:var(--text-muted);font-size:11.5px">Aguardando Laudo</span>`
-              : `<button class="act-btn" data-action="laudo-exame" data-id="${e.id}" type="button">Laudo</button>`);
+              : `<button class="act-btn" data-action="laudo-exame" data-id="${esc(e.id)}" type="button">Laudo</button>`);
 
         return `<tr>
           <td>
-            <div class="fw-600">${e.paciente}</div>
-            <div class="text-muted-sm">${e.cpf ? e.cpf + ' · ' : ''}ID: ${e.id || e.pid || '—'}</div>
+            <div class="fw-600">${esc(e.paciente)}</div>
+            <div class="text-muted-sm">${e.cpf ? esc(e.cpf) + ' · ' : ''}ID: ${esc(e.id || e.pid || '—')}</div>
           </td>
           <td>
-            <div>${e.tipo}</div>
-            ${e.solicitante ? `<div class="text-muted-sm">${e.solicitante}</div>` : ''}
+            <div>${esc(e.tipo)}</div>
+            ${e.solicitante ? `<div class="text-muted-sm">${esc(e.solicitante)}</div>` : ''}
           </td>
           <td>
-            <span class="mono">${e.data}</span>
-            ${e.horario ? `<div class="text-muted-sm mono">${e.horario}</div>` : ''}
+            <span class="mono">${esc(e.data)}</span>
+            ${e.horario ? `<div class="text-muted-sm mono">${esc(e.horario)}</div>` : ''}
           </td>
-          <td>${e.unidade || 'Unidade Central'}</td>
+          <td>${esc(e.unidade || 'Unidade Central')}</td>
           <td>${this.badge(statusExibido, badgeCls)}</td>
           <td>
             <div style="display:flex;gap:4px;flex-wrap:wrap">
-              <button class="act-btn" data-action="view-exame" data-id="${e.id}" type="button">Ver</button>
+              <button class="act-btn" data-action="view-exame" data-id="${esc(e.id)}" type="button">Ver</button>
               ${btnAlterar}
               ${btnHistorico}
               ${btnDownload}
@@ -515,33 +538,41 @@ const Render = {
           const chipBg = u.tipoBg || (u.tipo === 'Hospital' ? '#fef2f2' : (u.tipo === 'UPA' ? '#fef9c3' : (u.tipo === 'AME' ? '#f3e8ff' : '#e8f2fb')));
           const chipColor = u.tipoColor || (u.tipo === 'Hospital' ? '#b91c1c' : (u.tipo === 'UPA' ? '#92400e' : (u.tipo === 'AME' ? '#7e22ce' : '#1d4ed8')));
 
-          const capacidadeHtml = u.indisponivel
-            ? `<div style="font-size:11.5px;color:var(--danger);margin-bottom:4px;font-weight:600">${u.capacidade || 'Indisponível · Reforma'}</div><div class="prog-bar"><div class="prog-fill bar-red" style="width:100%"></div></div>`
-            : `<div style="font-size:11.5px;color:var(--text-muted);margin-bottom:4px">${u.capacidade || '—'}</div><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill ${u.barClass || ''}" style="width:${u.ocupacao || 0}%;${u.barColor ? `background:${u.barColor}` : ''}"></div></div><span class="prog-label" style="color:${u.barColor || 'var(--primary)'}">${u.ocupacao != null ? `${u.ocupacao}%` : ''}</span></div>`;
+          // Capacidade agora é numérica (leitos/vagas) — UnidadesAPI. Registros
+          // antigos com texto ("500 leitos") continuam sendo exibidos como estão.
+          const capTexto = typeof u.capacidade === 'number'
+            ? `${u.capacidade.toLocaleString('pt-BR')} leitos/vagas`
+            : (u.capacidade || '—');
+          const ocupacao = Math.max(0, Math.min(100, Number(u.ocupacao) || 0));
+          const barCor = ocupacao >= 85 ? 'var(--danger)' : ocupacao >= 70 ? 'var(--warning)' : 'var(--primary)';
+          const capacidadeHtml = (u.indisponivel || isManutencao || isInativa)
+            ? `<div style="font-size:11.5px;color:var(--danger);margin-bottom:4px;font-weight:600">${esc(capTexto)} · indisponível</div><div class="prog-bar"><div class="prog-fill bar-red" style="width:100%"></div></div>`
+            : `<div style="font-size:11.5px;color:var(--text-muted);margin-bottom:4px">${esc(capTexto)}</div><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:${ocupacao}%;background:${barCor}"></div></div><span class="prog-label" style="color:${barCor}">${ocupacao}%</span></div>`;
+          const icone = u.icone || { Hospital: '🏥', UPA: '🚑', UBS: '🏪', AME: '🩺' }[u.tipo] || '🏥';
 
           return `
             <tr>
               <td>
                 <div style="display:flex;align-items:center;gap:10px">
-                  <div style="width:36px;height:36px;border-radius:9px;background:${u.icoBg || '#fef2f2'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${u.icone || '🏥'}</div>
+                  <div style="width:36px;height:36px;border-radius:9px;background:${chipBg};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${icone}</div>
                   <div>
-                    <div style="font-weight:600">${u.nome}</div>
-                    <div style="font-size:11px;color:var(--text-muted)">ID: ${u.id}</div>
+                    <div style="font-weight:600">${esc(u.nome)}</div>
+                    <div style="font-size:11px;color:var(--text-muted)">ID: ${esc(u.id)}</div>
                   </div>
                 </div>
               </td>
-              <td><span class="type-chip" style="background:${chipBg};color:${chipColor}">${u.tipo}</span></td>
-              <td><div style="font-size:12.5px">${u.endereco}</div></td>
+              <td><span class="type-chip" style="background:${chipBg};color:${chipColor}">${esc(u.tipo)}</span></td>
+              <td><div style="font-size:12.5px">${esc(u.endereco)}</div></td>
               <td>${capacidadeHtml}</td>
               <td>
                 <span style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:${statusCor}">
-                  <span style="width:7px;height:7px;border-radius:50%;background:${statusCor};display:inline-block"></span>${u.status}
+                  <span style="width:7px;height:7px;border-radius:50%;background:${statusCor};display:inline-block"></span>${esc(u.status)}
                 </span>
               </td>
               <td>
                 <div style="display:flex;gap:4px">
-                  <button class="act-btn" data-action="view-unidade" data-id="${u.id}" type="button">Ver</button>
-                  <button class="act-btn" data-action="edit-unidade" data-id="${u.id}" type="button">Editar</button>
+                  <button class="act-btn" data-action="view-unidade" data-id="${esc(u.id)}" type="button">Ver</button>
+                  <button class="act-btn" data-action="edit-unidade" data-id="${esc(u.id)}" type="button">Editar</button>
                 </div>
               </td>
             </tr>
@@ -562,8 +593,8 @@ const Render = {
       insumosEl.innerHTML = boxes.insumos.map(item => `
         <div class="insumo-row">
           <div class="insumo-ico" style="background:${item.icoBg || bgMap[item.color] || '#e8f2fb'}">${item.icone || '📦'}</div>
-          <div class="insumo-name">${item.nome}</div>
-          <div class="insumo-pct" style="color:var(--${item.color || 'primary'})">${item.pct}%</div>
+          <div class="insumo-name">${esc(item.nome)}</div>
+          <div class="insumo-pct" style="color:var(--${item.color || 'primary'})">${esc(item.pct)}%</div>
         </div>
       `).join('');
     }
@@ -575,9 +606,9 @@ const Render = {
         <div style="display:flex;align-items:center;justify-content:space-between">
           <span style="display:flex;align-items:center;gap:6px">
             <span style="width:10px;height:10px;border-radius:50%;background:${d.cor || '#0a6ebd'};display:inline-block"></span>
-            <span style="font-size:13px">${d.tipo}</span>
+            <span style="font-size:13px">${esc(d.tipo)}</span>
           </span>
-          <span style="font-weight:700">${d.total}</span>
+          <span style="font-weight:700">${esc(d.total)}</span>
         </div>
       `).join('');
     }
@@ -585,18 +616,26 @@ const Render = {
     // Alertas (se container dinâmico existir)
     const alertasEl = root.querySelector('[data-box="alertas-rows"]');
     if (alertasEl && Array.isArray(boxes.alertas)) {
-      alertasEl.innerHTML = boxes.alertas.map(a => `
-        <div class="alert-item" style="padding:9px 0">
-          <div class="alert-ico a-${a.tipo || 'warn'}" style="width:28px;height:28px">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m10.29 3.86-8.19 14.17A2 2 0 0 0 3.82 21h16.36a2 2 0 0 0 1.72-3l-8.19-14.14a2 2 0 0 0-3.46.01z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          </div>
-          <div class="alert-body">
-            <strong style="font-size:12px">${a.titulo}</strong>
-            <p>${a.descricao}</p>
-          </div>
-        </div>
-      `).join('');
+      alertasEl.innerHTML = this.alertasHtml(boxes.alertas, 'Nenhuma unidade com alerta no momento.');
     }
+  },
+
+  // Lista de alertas no formato { nivel|tipo: 'red'|'warn', titulo, descricao }.
+  alertasHtml(alertas, vazio = 'Nenhum alerta no momento.') {
+    if (!alertas || alertas.length === 0) {
+      return `<div style="padding:12px 0;color:var(--text-muted);font-size:12.5px">✅ ${esc(vazio)}</div>`;
+    }
+    return alertas.map(a => `
+      <div class="alert-item" style="padding:9px 0">
+        <div class="alert-ico a-${(a.nivel || a.tipo) === 'red' ? 'red' : 'warn'}" style="width:28px;height:28px">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m10.29 3.86-8.19 14.17A2 2 0 0 0 3.82 21h16.36a2 2 0 0 0 1.72-3l-8.19-14.14a2 2 0 0 0-3.46.01z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="alert-body">
+          <strong style="font-size:12px">${esc(a.titulo)}</strong>
+          <p>${esc(a.descricao)}</p>
+        </div>
+      </div>
+    `).join('');
   },
 
   renderVacinacao(root, data) {
@@ -604,10 +643,72 @@ const Render = {
     if (!root) return;
     data = data || window.App?.data?.vacinacao || {};
     const boxes = data.boxes || {};
+    const api = window.VacinacaoAPI;
 
     const statsEl = root.querySelector('[data-box="stats"]');
     if (statsEl && boxes.stats) {
       this.renderStats(statsEl, boxes.stats);
+    }
+
+    const corSituacao = { Normal: 'var(--primary)', 'Atenção': 'var(--warning)', 'Crítico': 'var(--danger)', Esgotado: 'var(--danger)' };
+    const badgeSituacao = { Normal: 'b-green', 'Atenção': 'b-yellow', 'Crítico': 'b-red', Esgotado: 'b-red' };
+
+    const painel = root.querySelector('[data-box="vacinas-painel"]');
+    if (painel && api) {
+      const vacinas = api.getEstoque();
+      painel.innerHTML = vacinas.map((v, i) => {
+        const cobertura = v.populacaoAlvo > 0 ? Math.min(100, Math.round((v.aplicadas / v.populacaoAlvo) * 100)) : 0;
+        const cor = corSituacao[v.situacao] || 'var(--primary)';
+        const critico = v.situacao === 'Crítico' || v.situacao === 'Esgotado';
+        return `
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:center;padding:13px 0;${i < vacinas.length - 1 ? 'border-bottom:1px solid var(--border)' : ''}">
+            <div style="display:flex;align-items:center;gap:10px"><div class="vax-ico" style="background:#e8f2fb">${esc(v.icone || '💉')}</div><div><div style="font-size:13px;font-weight:600">${esc(v.nome)}</div><div style="font-size:11px;color:var(--text-muted)">${esc(v.detalhe || '')}</div></div></div>
+            <div><div style="font-size:13px;font-weight:700;${critico ? 'color:var(--danger)' : ''}">${v.estoque.toLocaleString('pt-BR')}</div><div style="font-size:11px;color:${critico ? 'var(--danger)' : 'var(--text-muted)'}">doses · mín. ${v.estoqueMinimo}</div></div>
+            <div><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:${cobertura}%;background:${cor}"></div></div><span class="prog-label" style="color:${cor}">${cobertura}%</span></div></div>
+            <div>${this.badge(v.situacao, badgeSituacao[v.situacao] || 'b-gray')}</div>
+          </div>`;
+      }).join('');
+    }
+
+    const tbody = root.querySelector('[data-box="aplicacoes-tbody"]');
+    if (tbody && api) {
+      const { itens, atual, totalPaginas, total } = this.paginar(api.getAplicacoes(), 'vacinacao');
+      const fmt = (iso) => {
+        const d = new Date(iso);
+        return Number.isNaN(d.getTime()) ? esc(iso) : d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      };
+      tbody.innerHTML = total === 0
+        ? '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Nenhuma aplicação registrada.</td></tr>'
+        : itens.map(a => `
+          <tr>
+            <td><div style="font-weight:600">${esc(a.paciente)}</div>${a.cpf ? `<div class="text-muted-sm">${esc(a.cpf)}</div>` : ''}</td>
+            <td>${esc(a.vacina)}</td><td>${esc(a.dose)}</td>
+            <td class="mono" style="font-size:12px">${fmt(a.dataHora)}</td>
+            <td>${esc(a.profissional)}</td><td>${esc(a.unidade)}</td>
+          </tr>`).join('');
+      this.montarPaginacao(root.querySelector('.pagination'), {
+        pageId: 'vacinacao', total, atual, totalPaginas,
+        rerender: () => this.renderVacinacao(root, data)
+      });
+    }
+
+    const alertasEl = root.querySelector('[data-box="alertas-estoque"]');
+    if (alertasEl && api) {
+      const alertas = api.getAlertas().map(v => ({
+        nivel: 'red',
+        titulo: `${v.nome}: ${v.situacao === 'Esgotado' ? 'esgotado' : 'estoque baixo'}`,
+        descricao: `${v.estoque} doses em estoque (mínimo ${v.estoqueMinimo}). Solicite reposição.`
+      }));
+      alertasEl.innerHTML = this.alertasHtml(alertas, 'Todos os estoques acima do mínimo.');
+    }
+
+    const faixasEl = root.querySelector('[data-box="faixas-etarias"]');
+    if (faixasEl && Array.isArray(boxes.faixasEtarias)) {
+      const cores = { success: ['var(--success)', 'bar-green'], warning: ['var(--warning)', 'bar-orange'], primary: ['var(--primary)', 'bar-blue'], danger: ['var(--danger)', 'bar-red'] };
+      faixasEl.innerHTML = boxes.faixasEtarias.map(f => {
+        const [cor, barra] = cores[f.color] || cores.primary;
+        return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:500">${esc(f.faixa)}</span><span style="font-size:12px;font-weight:700;color:${cor}">${esc(f.pct)}%</span></div><div class="prog-bar"><div class="prog-fill ${barra}" style="width:${Number(f.pct) || 0}%"></div></div></div>`;
+      }).join('');
     }
   },
 
@@ -625,10 +726,10 @@ const Render = {
       container.innerHTML = registros.map((r, i) => `
         <div class="log-item" data-action="view-log" data-index="${offset + i}" style="cursor:pointer">
           <div class="log-dot" style="background:${dotColors[r.dot] || 'var(--primary)'}"></div>
-          <div class="log-time">${r.hora}</div>
+          <div class="log-time">${esc(r.hora)}</div>
           <div style="flex:1">
-            <div class="log-text"><span class="badge ${r.badge}" style="font-size:10px;padding:1px 7px;margin-right:6px">${r.tipo}</span><strong>${r.titulo || r.acao}</strong></div>
-            <div class="log-meta">${r.meta || `Módulo: ${r.modulo || 'SISTEMA'} · Usuário: ${r.usuario || 'sistema'} · ${r.descricao || ''}`}</div>
+            <div class="log-text"><span class="badge ${esc(r.badge)}" style="font-size:10px;padding:1px 7px;margin-right:6px">${esc(r.tipo)}</span><strong>${esc(r.titulo || r.acao)}</strong></div>
+            <div class="log-meta">${esc(r.meta || `Módulo: ${r.modulo || 'SISTEMA'} · Usuário: ${r.usuario || 'sistema'} · ${r.descricao || ''}`)}</div>
           </div>
         </div>`).join('');
     }
@@ -657,7 +758,7 @@ const Render = {
     const nav = root.querySelector('[data-box="config-nav"]');
     if (nav && b.secoes) {
       nav.innerHTML = b.secoes.map((s, i) =>
-        `<button type="button" class="config-nav-item${i === 0 ? ' active' : ''}" data-config-tab="${s.id}">${s.label}</button>`
+        `<button type="button" class="config-nav-item${i === 0 ? ' active' : ''}" data-config-tab="${esc(s.id)}">${esc(s.label)}</button>`
       ).join('');
       this.bindConfigTabs(root);
     }
@@ -686,8 +787,8 @@ const Render = {
     if (notif && b.notificacoes) {
       notif.innerHTML = b.notificacoes.map(n => `
         <div class="toggle-row">
-          <div class="toggle-info"><strong>${n.titulo}</strong><span>${n.descricao}</span></div>
-          <input type="checkbox" data-notif="${n.id}" ${n.ativo ? 'checked' : ''}>
+          <div class="toggle-info"><strong>${esc(n.titulo)}</strong><span>${esc(n.descricao)}</span></div>
+          <input type="checkbox" data-notif="${esc(n.id)}" ${n.ativo ? 'checked' : ''}>
         </div>`).join('');
     }
 
@@ -766,13 +867,13 @@ const Render = {
       listContainer.innerHTML = filtered.map(u => {
         let extraInfo = '';
         if (u.perfil === 'Cidadão' || u.perfil === 'Paciente') {
-          extraInfo = `RG: ${u.rg || '—'} · SUS: ${u.sus || '—'} · acesso web só aos próprios dados (visualização)`;
+          extraInfo = `RG: ${esc(u.rg || '—')} · SUS: ${esc(u.sus || '—')} · acesso web só aos próprios dados (visualização)`;
         } else if (u.perfil === 'Recepção') {
-          extraInfo = `Unidade: ${u.unidade || '—'}`;
+          extraInfo = `Unidade: ${esc(u.unidade || '—')}`;
         } else if (u.perfil === 'Profissional da Saúde') {
-          extraInfo = `Reg: ${u.registro || '—'} · ${u.especialidade || '—'} (${u.unidade || '—'})`;
+          extraInfo = `Reg: ${esc(u.registro || '—')} · ${esc(u.especialidade || '—')} (${esc(u.unidade || '—')})`;
         } else {
-          extraInfo = `${u.cargo || '—'} (${u.setor || '—'})`;
+          extraInfo = `${esc(u.cargo || '—')} (${esc(u.setor || '—')})`;
         }
 
         const badgeClasses = {
@@ -787,11 +888,11 @@ const Render = {
         return `
           <div style="padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; transition: background 0.15s;" class="registered-user-row">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <strong style="font-size:13.5px; color: var(--text);">${u.nome}</strong>
-              <span class="badge ${badgeClass}" style="font-size: 9.5px; padding: 2px 6px;">${u.perfil}</span>
+              <strong style="font-size:13.5px; color: var(--text);">${esc(u.nome)}</strong>
+              <span class="badge ${badgeClass}" style="font-size: 9.5px; padding: 2px 6px;">${esc(u.perfil)}</span>
             </div>
             <div style="font-size: 11px; color: var(--text-muted);">
-              CPF: <span style="font-family:monospace; color:var(--text);">${u.cpf}</span> · E-mail: <span>${u.email}</span>
+              CPF: <span style="font-family:monospace; color:var(--text);">${esc(u.cpf)}</span> · E-mail: <span>${esc(u.email)}</span>
             </div>
             <div style="font-size: 11px; color: var(--text-muted); font-style: italic;">
               ${extraInfo}

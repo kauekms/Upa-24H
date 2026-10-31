@@ -15,7 +15,9 @@
  *                       Exames (visualizar e inserir novos). Sem acesso a
  *                       Vacinação, Unidades, Logs ou Cadastro de Usuários.
  *  - Profissional da Saúde → mantido como já funcionava (tudo, exceto Logs e
- *                       Cadastro de Usuários).
+ *                       Cadastro de Usuários). Registra aplicações de vacina.
+ *                       ATUALIZAÇÃO (30/10/2026): 'vacinacao' não estava em
+ *                       nenhum perfil, então a tela era inacessível para todos.
  *  - Cidadão (antigo "Paciente") → o plano original era esse perfil só existir
  *                       como CADASTRO, com o acesso de verdade acontecendo só
  *                       pelo futuro aplicativo móvel (.NET MAUI). Ainda não
@@ -45,8 +47,8 @@ const Permissoes = (() => {
   // 'configuracoes' e 'perfil' não entram aqui de propósito: são acessíveis
   // a qualquer usuário autenticado (ficam fora do menu principal).
   const PAGINAS_POR_PERFIL = {
-    'Administrador': ['dashboard', 'agendamentos', 'consultas', 'exames', 'unidades', 'logs', 'cadastro-usuarios'],
-    'Profissional da Saúde': ['dashboard', 'agendamentos', 'consultas', 'exames', 'unidades'],
+    'Administrador': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades', 'logs', 'cadastro-usuarios'],
+    'Profissional da Saúde': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades'],
     'Recepção': ['dashboard', 'agendamentos', 'consultas', 'exames'],
     // Cidadão e Paciente têm a mesma visão restrita: autoatendimento de
     // agendamentos, consultas e exames próprios.
@@ -59,6 +61,19 @@ const Permissoes = (() => {
 
   // Perfis autorizados a cadastrar e gerenciar novos usuários no sistema.
   const PERFIS_QUE_GERENCIAM_USUARIOS = ['Administrador'];
+
+  // Ações protegidas usadas pelo middleware (AuthAPI.verificarAcesso).
+  // Ação que não está nesta tabela é NEGADA: esquecer de cadastrar uma ação
+  // nova não pode virar acesso liberado.
+  const PERFIS_POR_ACAO = {
+    gerenciar_atendimentos: PERFIS_QUE_GERENCIAM_ATENDIMENTOS,
+    cadastrar_usuarios: PERFIS_QUE_GERENCIAM_USUARIOS,
+    ver_logs: ['Administrador'],
+    gerenciar_unidades: ['Administrador'],
+    registrar_vacinacao: ['Administrador', 'Profissional da Saúde'],
+    gerenciar_estoque_vacinas: ['Administrador'],
+    atualizar_consultas: ['Administrador', 'Recepção', 'Profissional da Saúde']
+  };
 
   function normalizarPerfil(perfil) {
     if (!perfil) return '';
@@ -99,6 +114,12 @@ const Permissoes = (() => {
     return PERFIS_QUE_GERENCIAM_USUARIOS.includes(norm) || PERFIS_QUE_GERENCIAM_USUARIOS.includes(perfil);
   }
 
+  function podeExecutarAcao(perfil, acao) {
+    const perfis = PERFIS_POR_ACAO[acao];
+    if (!perfis) return false;
+    return perfis.includes(normalizarPerfil(perfil)) || perfis.includes(perfil);
+  }
+
   // Página inicial para onde mandar o usuário logo após o login.
   function paginaInicial(perfil) {
     const paginas = paginasVisiveis(perfil);
@@ -114,6 +135,8 @@ const Permissoes = (() => {
     perfilPodeAcessarPagina,
     podeGerenciarAtendimentos,
     podeCadastrarUsuarios,
+    podeExecutarAcao,
+    PERFIS_POR_ACAO,
     paginaInicial
   };
 })();

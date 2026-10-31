@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Sistema de Gestão UPA 24H - Saúde Pública Digital",
   "scripts": {
+    "build:fallbacks": "node scripts/gerar-fallbacks.js",
     "test": "node --test tests/*.test.js"
   },
   "keywords": [

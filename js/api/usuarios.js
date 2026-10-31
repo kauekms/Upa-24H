@@ -370,6 +370,23 @@ const UsuariosAPI = (() => {
             status: 405, headers: { 'Content-Type': 'application/json' }
           });
         }
+        // Antes esta rota não exigia autenticação nenhuma: qualquer visitante
+        // conseguia criar um Administrador com um POST direto.
+        const acesso = window.Http
+          ? window.Http.autorizar(options, { acao: 'cadastrar_usuarios' })
+          : { permitido: false, status: 401, error: 'Sessão inválida ou expirada.' };
+        if (!acesso.permitido) {
+          window.AuditoriaService?.registrar({
+            usuario: acesso.user?.nome || 'Anônimo',
+            acao: 'Cadastro de usuário negado',
+            tipo: 'Aviso',
+            modulo: 'SEGURANÇA',
+            descricao: acesso.error
+          });
+          return new Response(JSON.stringify({ success: false, error: acesso.error }), {
+            status: acesso.status, headers: { 'Content-Type': 'application/json' }
+          });
+        }
         try {
           const dados = JSON.parse(options.body);
           const { status, body } = await processarCadastro(dados);

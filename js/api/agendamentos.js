@@ -629,71 +629,80 @@ const AgendamentosAPI = (() => {
     interceptado = true;
     const originalFetch = window.fetch.bind(window);
 
+    const ROTAS = ['/agendamentos', '/agendamentos/solicitar', '/agendamentos/alterar', '/agendamentos/confirmar', '/agendamentos/cancelar', '/agendamentos/indicadores'];
+
     window.fetch = async (url, options = {}) => {
-      const urlStr = typeof url === 'string' ? url : (url && url.url) || '';
-      const method = (options.method || 'GET').toUpperCase();
+      const Http = window.Http;
+      const rota = Http ? Http.caminho(url) : '';
+      if (!ROTAS.includes(rota)) return originalFetch(url, options);
 
-      // POST /agendamentos/solicitar
-      if (urlStr.includes('/agendamentos/solicitar') && method === 'POST') {
-        try {
-          const body = JSON.parse(options.body || '{}');
-          const res = await solicitarAgendamento(body);
-          return new Response(JSON.stringify(res.body), { status: res.status, headers: { 'Content-Type': 'application/json' } });
-        } catch (err) {
-          return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      const method = Http.metodo(options);
+      const acesso = Http.autorizar(options);
+      if (!acesso.permitido) return Http.negado(acesso);
+
+      const perfil = acesso.perfil;
+      const operador = acesso.user?.nome || 'Sistema';
+      const ehCidadao = Http.ehCidadao(perfil);
+      const ehEquipe = window.Permissoes?.podeGerenciarAtendimentos(perfil);
+      const cpfSessao = Http.cpfLimpo(acesso.user?.cpf);
+      const proibido = (msg) => Http.json(403, { success: false, error: msg });
+
+      // Somente equipe (Administrador/Recepção) ou o próprio Cidadão alteram
+      // agendamentos. Profissional da Saúde atende, mas não agenda.
+      const podeMexerNoAgendamento = (id) => {
+        if (ehEquipe) return true;
+        if (!ehCidadao) return false;
+        const item = getAll().find(a => a.id === id);
+        return !item || Http.cpfLimpo(item.cpf) === cpfSessao; // inexistente → a API responde 404
+      };
+
+      try {
+        if (method === 'GET' && (rota === '/agendamentos' || rota === '/agendamentos/indicadores')) {
+          const filtros = Http.parametros(url);
+          if (ehCidadao) filtros.cpf = acesso.user?.cpf || '-'; // Cidadão só vê os próprios
+          const res = rota === '/agendamentos/indicadores' ? getIndicadores(filtros) : listarAgendamentos(filtros);
+          return Http.json(200, res);
         }
-      }
 
-      // PUT /agendamentos/alterar ou POST /agendamentos/alterar
-      if (urlStr.includes('/agendamentos/alterar') && (method === 'PUT' || method === 'POST')) {
-        try {
-          const body = JSON.parse(options.body || '{}');
-          const res = await alterarAgendamento(body);
-          return new Response(JSON.stringify(res.body), { status: res.status, headers: { 'Content-Type': 'application/json' } });
-        } catch (err) {
-          return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        const body = Http.corpo(options);
+        // O perfil declarado no corpo é ignorado: vale o da sessão.
+        const dados = { ...body, perfilSolicitante: perfil, perfilOperador: perfil };
+        if (!ehEquipe) {
+          delete dados.encaixeAdministrativo;
+          delete dados.tipo; // Cidadão não pode declarar cancelamento ADMINISTRATIVO
         }
-      }
 
-      // POST /agendamentos/confirmar
-      if (urlStr.includes('/agendamentos/confirmar') && method === 'POST') {
-        try {
-          const body = JSON.parse(options.body || '{}');
-          const res = await confirmarAgendamento(body);
-          return new Response(JSON.stringify(res.body), { status: res.status, headers: { 'Content-Type': 'application/json' } });
-        } catch (err) {
-          return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        if (rota === '/agendamentos/solicitar' && method === 'POST') {
+          if (!ehEquipe && !ehCidadao) return proibido(`Acesso negado: perfil "${perfil}" não pode solicitar agendamentos.`);
+          if (ehCidadao && Http.cpfLimpo(dados.cpf) !== cpfSessao) {
+            return proibido('Acesso negado: o cidadão só pode solicitar agendamentos para o próprio CPF.');
+          }
+          const res = await solicitarAgendamento(dados, operador);
+          return Http.json(res.status, res.body);
         }
-      }
 
-      // POST /agendamentos/cancelar ou DELETE /agendamentos/cancelar
-      if (urlStr.includes('/agendamentos/cancelar') && (method === 'POST' || method === 'DELETE')) {
-        try {
-          const body = JSON.parse(options.body || '{}');
-          const res = await cancelarAgendamento(body);
-          return new Response(JSON.stringify(res.body), { status: res.status, headers: { 'Content-Type': 'application/json' } });
-        } catch (err) {
-          return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        if (rota === '/agendamentos/alterar' && (method === 'PUT' || method === 'POST')) {
+          if (!podeMexerNoAgendamento(dados.id)) return proibido('Acesso negado: agendamento de outro cidadão ou perfil sem permissão.');
+          const res = await alterarAgendamento(dados, operador);
+          return Http.json(res.status, res.body);
         }
-      }
 
-      // GET /agendamentos/indicadores
-      if (urlStr.includes('/agendamentos/indicadores') && method === 'GET') {
-        const u = new URL(urlStr, 'http://localhost');
-        const filtros = Object.fromEntries(u.searchParams.entries());
-        const res = getIndicadores(filtros);
-        return new Response(JSON.stringify(res), { status: 200, headers: { 'Content-Type': 'application/json' } });
-      }
+        if (rota === '/agendamentos/confirmar' && method === 'POST') {
+          if (!podeMexerNoAgendamento(dados.id)) return proibido('Acesso negado: agendamento de outro cidadão ou perfil sem permissão.');
+          const res = await confirmarAgendamento(dados, operador);
+          return Http.json(res.status, res.body);
+        }
 
-      // GET /agendamentos
-      if (urlStr.includes('/agendamentos') && method === 'GET') {
-        const u = new URL(urlStr, 'http://localhost');
-        const filtros = Object.fromEntries(u.searchParams.entries());
-        const res = listarAgendamentos(filtros);
-        return new Response(JSON.stringify(res), { status: 200, headers: { 'Content-Type': 'application/json' } });
-      }
+        if (rota === '/agendamentos/cancelar' && (method === 'POST' || method === 'DELETE')) {
+          if (!podeMexerNoAgendamento(dados.id)) return proibido('Acesso negado: agendamento de outro cidadão ou perfil sem permissão.');
+          const res = await cancelarAgendamento(dados, operador);
+          return Http.json(res.status, res.body);
+        }
 
-      return originalFetch(url, options);
+        return Http.json(405, { success: false, error: 'Método não permitido.' });
+      } catch (err) {
+        return Http.json(500, { success: false, error: err.message });
+      }
     };
   }
 
