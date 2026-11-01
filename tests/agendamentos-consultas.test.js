@@ -42,11 +42,19 @@ window.ConsultasAPI = ConsultasAPI;
 // SUÍTE DE TESTES: Agendamentos, Consultas, RN01, RN02, RN03
 // ==========================================
 
+// Data no horário LOCAL, como a hora vinda de toTimeString(). Com toISOString()
+// a data saía em UTC e, à noite, virava o dia seguinte: "daqui a 5h" passava a
+// ser daqui a 29h e a RN01 deixava de barrar.
+function dataLocalISO(d) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 test('1. AgendamentosAPI: RN01 - Bloquear solicitação com antecedência inferior a 24h', async (t) => {
   // Cria data para daqui a 5 horas
   const agora = new Date();
   const dataCurta = new Date(agora.getTime() + 5 * 3600 * 1000);
-  const dataStr = dataCurta.toISOString().slice(0, 10);
+  const dataStr = dataLocalISO(dataCurta);
   const horaStr = dataCurta.toTimeString().slice(0, 5);
 
   const res = await window.AgendamentosAPI.solicitar({
@@ -70,7 +78,7 @@ test('2. AgendamentosAPI: RN01 - Permitir solicitação com antecedência mínim
   // Cria data para daqui a 48 horas
   const agora = new Date();
   const dataValida = new Date(agora.getTime() + 48 * 3600 * 1000);
-  const dataStr = dataValida.toISOString().slice(0, 10);
+  const dataStr = dataLocalISO(dataValida);
   const horaStr = '10:00';
 
   const res = await window.AgendamentosAPI.solicitar({
@@ -93,7 +101,7 @@ test('2. AgendamentosAPI: RN01 - Permitir solicitação com antecedência mínim
 test('3. AgendamentosAPI: Conflito de Horário - Bloquear duplo agendamento para mesmo médico e horário', async (t) => {
   const agora = new Date();
   const dataValida = new Date(agora.getTime() + 72 * 3600 * 1000);
-  const dataStr = dataValida.toISOString().slice(0, 10);
+  const dataStr = dataLocalISO(dataValida);
   const horaStr = '14:30';
   const medico = 'Dr. Manoel Joaquim';
 
@@ -127,7 +135,7 @@ test('3. AgendamentosAPI: Conflito de Horário - Bloquear duplo agendamento para
 test('4. AgendamentosAPI: Confirmar Agendamento', async (t) => {
   const agora = new Date();
   const dataValida = new Date(agora.getTime() + 96 * 3600 * 1000);
-  const dataStr = dataValida.toISOString().slice(0, 10);
+  const dataStr = dataLocalISO(dataValida);
 
   const criacao = await window.AgendamentosAPI.solicitar({
     paciente: 'Paciente Confirmar',
@@ -151,7 +159,7 @@ test('5. AgendamentosAPI: RN02 - Alteração por Cidadão com menos de 24h deve 
   // Criar agendamento próximo (mas acima de 24h para permitir criação inicial)
   const agora = new Date();
   const dataValida = new Date(agora.getTime() + 26 * 3600 * 1000); // 26h à frente
-  const dataStr = dataValida.toISOString().slice(0, 10);
+  const dataStr = dataLocalISO(dataValida);
   const horaStr = dataValida.toTimeString().slice(0, 5);
 
   const criacao = await window.AgendamentosAPI.solicitar({
@@ -169,7 +177,7 @@ test('5. AgendamentosAPI: RN02 - Alteração por Cidadão com menos de 24h deve 
   const novaDataInvalida = new Date(agora.getTime() + 10 * 3600 * 1000);
   const resAlt = await window.AgendamentosAPI.alterar({
     id: agId,
-    novaData: novaDataInvalida.toISOString().slice(0, 10),
+    novaData: dataLocalISO(novaDataInvalida),
     novaHora: novaDataInvalida.toTimeString().slice(0, 5),
     perfilSolicitante: 'Cidadão'
   });
@@ -188,7 +196,7 @@ test('6. AgendamentosAPI: RN02 - Alteração por Cidadão com mais de 24h deve t
     especialidade: 'Dermatologia',
     medico: 'Dra. Patrícia Souza',
     unidade: 'UPA Central 24h',
-    data: dataInicial.toISOString().slice(0, 10),
+    data: dataLocalISO(dataInicial),
     hora: '15:00'
   });
   const agId = criacao.body.agendamento.id;
@@ -196,7 +204,7 @@ test('6. AgendamentosAPI: RN02 - Alteração por Cidadão com mais de 24h deve t
   const novaData = new Date(agora.getTime() + 96 * 3600 * 1000);
   const resAlt = await window.AgendamentosAPI.alterar({
     id: agId,
-    novaData: novaData.toISOString().slice(0, 10),
+    novaData: dataLocalISO(novaData),
     novaHora: '16:00',
     perfilSolicitante: 'Cidadão'
   });
@@ -216,7 +224,7 @@ test('7. AgendamentosAPI: RN03 - Cancelamento Administrativo exige justificativa
     especialidade: 'Clínica Geral',
     medico: 'Dr. Manoel Joaquim',
     unidade: 'UPA Central 24h',
-    data: dataValida.toISOString().slice(0, 10),
+    data: dataLocalISO(dataValida),
     hora: '09:00'
   });
   const agId = criacao.body.agendamento.id;
