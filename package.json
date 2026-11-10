@@ -1,10 +1,17 @@
 {
   "name": "upa-24h",
-  "version": "1.0.0",
+  "version": "3.3.0",
   "description": "Sistema de Gestão UPA 24H - Saúde Pública Digital",
+  "private": true,
   "scripts": {
-    "build:fallbacks": "node scripts/gerar-fallbacks.js",
-    "test": "node --test tests/*.test.js"
+    "start": "node scripts/servidor.js",
+    "build": "node scripts/gerar-fallbacks.js",
+    "test": "node --test tests/*.test.js",
+    "test:e2e": "node tests/e2e/smoke.e2e.js",
+    "test:all": "npm run build && npm test && npm run test:e2e"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "keywords": [
     "upa",

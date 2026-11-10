@@ -1,0 +1,59 @@
+<div class="page" id="page-dashboard">
+  <section class="dash-hero">
+    <div>
+      <div class="dash-hero-data" data-box="data-hoje"></div>
+      <h1 data-box="saudacao">Olá</h1>
+      <p class="page-sub">Resumo das atividades de saúde de hoje.</p>
+    </div>
+    <button class="btn btn-hero" id="btn-dash-agendar" type="button">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Novo agendamento
+    </button>
+  </section>
+
+  <div class="stats-grid" data-box="stats"></div>
+  <div class="vax-alerts-container" data-box="dashboard-alertas-vacinacao" aria-live="polite"></div>
+
+  <div class="grid-lateral">
+    <div class="coluna">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Agendamentos recentes</div>
+            <div class="card-sub">Os mais recentes pela data marcada</div>
+          </div>
+          <a href="#agendamentos" data-nav="agendamentos" class="card-link">Ver todos →</a>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Cidadão</th><th>Data</th><th>Especialidade</th><th>Unidade</th><th>Status</th><th></th></tr></thead>
+            <tbody data-box="agendamentos-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <aside>
+      <div class="card calendar-card">
+        <div class="calendar-hd">
+          <span class="calendar-title" data-box="cal-mes"></span>
+          <div class="calendar-nav">
+            <button class="cal-nav-btn" id="cal-btn-prev" type="button" aria-label="Mês anterior">‹</button>
+            <button class="cal-nav-btn" id="cal-btn-hoje" type="button">Hoje</button>
+            <button class="cal-nav-btn" id="cal-btn-next" type="button" aria-label="Próximo mês">›</button>
+          </div>
+        </div>
+        <div class="calendar-grid">
+          <span class="cal-dow">D</span><span class="cal-dow">S</span><span class="cal-dow">T</span><span class="cal-dow">Q</span><span class="cal-dow">Q</span><span class="cal-dow">S</span><span class="cal-dow">S</span>
+        </div>
+        <div class="calendar-grid" data-box="cal-dias"></div>
+        <div class="cal-legenda"><span class="cal-legenda-dot"></span>Dias com agendamentos</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Próximos atendimentos</span></div>
+        <div class="atend-list" data-box="proximos-atendimentos"></div>
+      </div>
+    </aside>
+  </div>
+</div>

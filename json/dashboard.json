@@ -1,25 +1,6 @@
 {
   "layout": "dashboard",
-  "titulo": "Visão Geral do Sistema",
-  "subtitulo": "Bem-vindo, {usuario}. Aqui está o resumo das atividades de saúde de hoje.",
-  "boxes": {
-    "stats": [
-      { "label": "Total de Cidadãos", "icon": "👥", "iconClass": "ic-blue", "value": "12.482", "note": "↑ +3% este mês", "noteClass": "note-green" },
-      { "label": "Consultas Agendadas", "icon": "📅", "iconClass": "ic-teal", "value": "158", "note": "Previstas para hoje", "noteClass": "note-muted" },
-      { "label": "Exames Pendentes", "icon": "📋", "iconClass": "ic-orange", "value": "42", "note": "Aguardando laudo", "noteClass": "note-orange" },
-      { "label": "Taxa de Comparecimento", "icon": "📊", "iconClass": "ic-red", "value": "94.2%", "bar": 94.2, "barClass": "bar-blue" }
-    ],
-    "agendamentosRecentes": [
-      { "nome": "Luciana Ferreira", "data": "07/05/2026", "horario": "13:20", "unidade": "Dr. Manoel Joaquim dos Reis", "status": "Confirmado", "badge": "b-green" },
-      { "nome": "Marcos Oliveira", "data": "07/05/2026", "horario": "13:20", "unidade": "Dr. Manoel Joaquim dos Reis", "status": "Confirmado", "badge": "b-green" },
-      { "nome": "Ana Paula Costa", "data": "07/05/2026", "horario": "14:00", "unidade": "Dr. Manoel Joaquim dos Reis", "status": "Pendente", "badge": "b-yellow" },
-      { "nome": "Roberto Alves", "data": "07/05/2026", "horario": "14:30", "unidade": "Dr. Manoel Joaquim dos Reis", "status": "Confirmado", "badge": "b-green" },
-      { "nome": "Fernanda Lima", "data": "07/05/2026", "horario": "15:00", "unidade": "Dr. Manoel Joaquim dos Reis", "status": "Cancelado", "badge": "b-red" }
-    ],
-    "proximosAtendimentos": [
-      { "periodo": "HOJE", "horario": "14:00", "nome": "Dr. Arnaldo Luiz", "descricao": "Cardiologia · Unidade Oeste" },
-      { "periodo": "HOJE", "horario": "15:30", "nome": "Dra. Heloísa Rocha", "descricao": "Ginecologia · Unidade Sul" },
-      { "periodo": "AMANHÃ", "horario": "09:00", "nome": "Lab Exames S/A", "descricao": "Hemograma Completo" }
-    ]
-  }
+  "titulo": "Visão geral",
+  "subtitulo": "Resumo das atividades de saúde de hoje.",
+  "boxes": {}
 }

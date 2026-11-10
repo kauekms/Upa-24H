@@ -1,0 +1,78 @@
+<div class="page" id="page-agendamentos">
+  <div class="page-hd">
+    <div>
+      <nav class="breadcrumb">Atendimento <span>›</span> <strong>Agendamentos</strong></nav>
+      <h1 class="page-title">Agendamentos</h1>
+      <p class="page-sub">Acompanhe os agendamentos com validação de horário e regras de antecedência.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-outline" id="btn-exportar-agendamentos" type="button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Exportar
+      </button>
+      <button class="btn btn-primary" id="btn-novo-agendamento" type="button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Novo agendamento
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid" data-box="stats"></div>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="filters-row">
+        <div class="filter-group grow">
+          <label for="filter-agendamentos-busca">Buscar</label>
+          <div class="search-input-wrap">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input class="filter-input" id="filter-agendamentos-busca" type="search" placeholder="Nome, CPF ou número">
+          </div>
+        </div>
+        <div class="filter-group">
+          <label for="filter-agendamentos-status">Status</label>
+          <select class="filter-select" id="filter-agendamentos-status">
+            <option value="">Todos</option>
+            <option>Confirmado</option>
+            <option>Pendente</option>
+            <option>Remarcado</option>
+            <option>Cancelado</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-agendamentos-especialidade">Especialidade</label>
+          <select class="filter-select" id="filter-agendamentos-especialidade">
+            <option value="">Todas</option>
+            <option>Clínica Geral</option><option>Cardiologia</option><option>Ginecologia</option><option>Ortopedia</option><option>Dermatologia</option><option>Pediatria</option><option>Neurologia</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-agendamentos-unidade">Unidade</label>
+          <select class="filter-select" id="filter-agendamentos-unidade">
+            <option value="">Todas</option>
+            <option>Unidade Centro</option><option>Unidade Julia</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-agendamentos-data-inicio">De</label>
+          <input class="filter-input" id="filter-agendamentos-data-inicio" type="date">
+        </div>
+        <div class="filter-group">
+          <label for="filter-agendamentos-data-fim">Até</label>
+          <input class="filter-input" id="filter-agendamentos-data-fim" type="date">
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-ghost btn-sm" id="btn-limpar-agendamentos" type="button">Limpar filtros</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Nº</th><th>Cidadão</th><th>Data / hora</th><th>Especialidade</th><th>Profissional</th><th>Unidade</th><th>Status</th><th class="col-acoes">Ações</th></tr></thead>
+        <tbody data-box="lista-tbody"></tbody>
+      </table>
+    </div>
+    <div class="pagination"><span class="page-info"></span><div class="page-btns"></div></div>
+  </div>
+</div>

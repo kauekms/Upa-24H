@@ -1,0 +1,76 @@
+<div class="page" id="page-logs">
+  <div class="page-hd">
+    <div>
+      <nav class="breadcrumb">Administração <span>›</span> <strong>Logs de sistema</strong></nav>
+      <h1 class="page-title">Logs de sistema</h1>
+      <p class="page-sub">Trilha de auditoria de todas as ações realizadas no sistema.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-outline" id="btn-exportar-logs" type="button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Exportar logs
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid" data-box="stats"></div>
+
+  <div class="grid-lateral">
+    <div class="card">
+      <div class="toolbar">
+        <div class="filters-row">
+          <div class="filter-group grow">
+            <label for="filter-logs-busca">Buscar</label>
+            <div class="search-input-wrap">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input class="filter-input" id="filter-logs-busca" type="search" placeholder="Ação, módulo ou termo">
+            </div>
+          </div>
+          <div class="filter-group">
+            <label for="filter-logs-tipo">Tipo</label>
+            <select class="filter-select" id="filter-logs-tipo">
+              <option value="">Todos</option><option>Erro</option><option>Aviso</option><option>Informação</option><option>Acesso</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-logs-usuario">Usuário</label>
+            <input class="filter-input" id="filter-logs-usuario" type="search" placeholder="Nome">
+          </div>
+          <div class="filter-group">
+            <label for="filter-logs-data-inicio">De</label>
+            <input class="filter-input" id="filter-logs-data-inicio" type="date">
+          </div>
+          <div class="filter-group">
+            <label for="filter-logs-data-fim">Até</label>
+            <input class="filter-input" id="filter-logs-data-fim" type="date">
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-ghost btn-sm" id="btn-limpar-logs" type="button">Limpar filtros</button>
+          </div>
+        </div>
+      </div>
+      <div data-box="logs-list"></div>
+      <div class="pagination"><span class="page-info"></span><div class="page-btns"></div></div>
+    </div>
+
+    <aside>
+      <div class="card card-padded">
+        <div class="card-title">Eventos por tipo</div>
+        <div class="tipo-linha"><span class="tipo-dot" style="background:var(--primary)"></span><span>Informação</span><strong id="side-info-count">0</strong></div>
+        <div class="tipo-linha"><span class="tipo-dot" style="background:var(--success)"></span><span>Acesso</span><strong id="side-acesso-count">0</strong></div>
+        <div class="tipo-linha"><span class="tipo-dot" style="background:var(--warning)"></span><span>Aviso</span><strong id="side-aviso-count">0</strong></div>
+        <div class="tipo-linha"><span class="tipo-dot" style="background:var(--danger)"></span><span>Erro</span><strong id="side-erro-count">0</strong></div>
+      </div>
+      <div class="card card-padded">
+        <div class="card-title">Módulos com mais eventos</div>
+        <div data-box="logs-modulos"></div>
+      </div>
+      <div class="card card-padded">
+        <div class="card-title">Armazenamento</div>
+        <div class="integridade-linha"><span>Persistência</span><strong>Navegador (local)</strong></div>
+        <div class="integridade-linha"><span>Retenção</span><strong>Últimos 2.000 eventos</strong></div>
+        <div class="integridade-linha"><span>Auditoria</span><strong class="text-success">Ativa</strong></div>
+      </div>
+    </aside>
+  </div>
+</div>

@@ -1,0 +1,103 @@
+<div class="page" id="page-vacinacao">
+  <div class="page-hd">
+    <div>
+      <nav class="breadcrumb">Saúde pública <span>›</span> <strong>Vacinação</strong></nav>
+      <h1 class="page-title">Campanha de vacinação</h1>
+      <p class="page-sub">Cobertura vacinal, controle de lotes em estoque e registro de aplicações.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-outline" id="btn-entrada-estoque-vacina" type="button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+        Entrada de lote
+      </button>
+      <button class="btn btn-primary" id="btn-registrar-vacinacao" type="button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Registrar aplicação
+      </button>
+    </div>
+  </div>
+
+  <div class="vax-alerts-container" data-box="vacinacao-alertas-banner" aria-live="polite"></div>
+  <div class="stats-grid" data-box="stats"></div>
+
+  <div class="card" style="margin-bottom:20px">
+    <div class="toolbar" style="border-bottom:none">
+      <div class="filters-row">
+        <div class="filter-group grow">
+          <label for="filter-vacinacao-busca">Buscar</label>
+          <div class="search-input-wrap">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input class="filter-input" id="filter-vacinacao-busca" type="search" placeholder="Cidadão, CPF, lote ou profissional">
+          </div>
+        </div>
+        <div class="filter-group">
+          <label for="filter-vacinacao-vacina">Vacina</label>
+          <select class="filter-select" id="filter-vacinacao-vacina">
+            <option value="">Todas</option>
+            <option>COVID-19 (Bivalente)</option><option>Influenza</option><option>Hepatite B</option><option>Febre Amarela</option><option>Meningite ACWY</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-vacinacao-unidade">Unidade</label>
+          <select class="filter-select" id="filter-vacinacao-unidade">
+            <option value="">Todas</option>
+            <option>Unidade Centro</option><option>Unidade Julia</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-vacinacao-data-inicio">De</label>
+          <input class="filter-input" id="filter-vacinacao-data-inicio" type="date">
+        </div>
+        <div class="filter-group">
+          <label for="filter-vacinacao-data-fim">Até</label>
+          <input class="filter-input" id="filter-vacinacao-data-fim" type="date">
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-ghost btn-sm" id="btn-limpar-vacinacao" type="button">Limpar filtros</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Campanhas</span>
+        <span class="badge b-blue" data-box="campanhas-count"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Campanha</th><th>Vacina</th><th>Público-alvo</th><th>Período</th><th>Meta</th><th>Aplicadas</th><th>Cobertura</th><th>Status</th></tr></thead>
+          <tbody data-box="campanhas-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Estoque por vacina e lote</span>
+        <span class="badge b-teal" data-box="estoque-count"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Vacina</th><th>Lote</th><th>Unidade</th><th>Validade</th><th>Disponível</th><th>Mínimo</th><th>Situação</th></tr></thead>
+          <tbody data-box="estoque-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Aplicações registradas</span>
+        <span class="badge b-green" data-box="aplicacoes-count"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Nº</th><th>Cidadão</th><th>Vacina</th><th>Lote</th><th>Dose</th><th>Unidade</th><th>Profissional</th><th>Data / hora</th></tr></thead>
+          <tbody data-box="aplicacoes-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="vacinacao-pagination"><span class="page-info"></span><div class="page-btns"></div></div>
+    </div>
+  </div>
+</div>

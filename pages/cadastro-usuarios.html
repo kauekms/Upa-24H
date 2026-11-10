@@ -1,0 +1,145 @@
+<div class="page" id="page-cadastro-usuarios">
+  <div class="page-hd">
+    <div>
+      <nav class="breadcrumb">Administração <span>›</span> <strong>Cadastro de usuários</strong></nav>
+      <h1 class="page-title">Cadastro de usuários</h1>
+      <p class="page-sub">Cadastre cidadãos, recepção, profissionais da saúde e administradores. Contas de cidadão acessam somente os próprios agendamentos, consultas e exames.</p>
+    </div>
+  </div>
+
+  <div class="grid-lateral" style="grid-template-columns:minmax(0,1fr) 380px">
+    <div class="card card-body">
+      <div class="card-title">Novo usuário</div>
+      <p class="card-sub" style="margin-bottom:18px">Os campos adicionais mudam conforme o perfil escolhido.</p>
+
+      <form id="form-cadastro-usuario" novalidate>
+        <div class="config-row">
+          <div class="config-field full">
+            <label for="cad-perfil">Perfil</label>
+            <select id="cad-perfil" required>
+              <option value="" disabled selected>Selecione o perfil…</option>
+              <option value="Cidadão">Cidadão</option>
+              <option value="Recepção">Recepção</option>
+              <option value="Profissional da Saúde">Profissional da Saúde</option>
+              <option value="Administrador">Administrador (TI)</option>
+            </select>
+          </div>
+        </div>
+        <div class="config-row">
+          <div class="config-field">
+            <label for="cad-nome">Nome completo</label>
+            <input type="text" id="cad-nome" placeholder="Nome e sobrenome" autocomplete="off" required>
+          </div>
+          <div class="config-field">
+            <label for="cad-cpf">CPF</label>
+            <input type="text" id="cad-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" required>
+          </div>
+        </div>
+        <div class="config-row">
+          <div class="config-field">
+            <label for="cad-email">E-mail</label>
+            <input type="email" id="cad-email" placeholder="nome@exemplo.com" autocomplete="off" required>
+          </div>
+          <div class="config-field">
+            <label for="cad-senha">Senha inicial</label>
+            <input type="password" id="cad-senha" placeholder="Mínimo recomendado: 8 caracteres" autocomplete="new-password" required>
+          </div>
+        </div>
+
+        <div id="fields-paciente" class="profile-fields-section" hidden>
+          <h4>Dados do cidadão</h4>
+          <div class="config-row">
+            <div class="config-field">
+              <label for="cad-sus">Cartão SUS</label>
+              <input type="text" id="cad-sus" placeholder="000.0000.0000.0000" maxlength="18" inputmode="numeric">
+            </div>
+            <div class="config-field">
+              <label for="cad-nascimento">Data de nascimento</label>
+              <input type="date" id="cad-nascimento">
+            </div>
+          </div>
+          <div class="config-row">
+            <div class="config-field">
+              <label for="cad-rg">RG <span class="opcional">(opcional com CPF)</span></label>
+              <input type="text" id="cad-rg" placeholder="Número do RG">
+            </div>
+          </div>
+        </div>
+
+        <div id="fields-recepcao" class="profile-fields-section" hidden>
+          <h4>Dados da recepção</h4>
+          <div class="config-row">
+            <div class="config-field">
+              <label for="cad-recep-unidade">Unidade de saúde</label>
+              <select id="cad-recep-unidade">
+                <option value="" disabled selected>Selecione…</option>
+                <option>Unidade Centro</option><option>Unidade Julia</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="fields-profissional" class="profile-fields-section" hidden>
+          <h4>Dados profissionais</h4>
+          <div class="config-row">
+            <div class="config-field">
+              <label for="cad-registro">Registro profissional</label>
+              <input type="text" id="cad-registro" placeholder="Ex.: CRM/SP 123456">
+            </div>
+            <div class="config-field">
+              <label for="cad-especialidade">Especialidade</label>
+              <select id="cad-especialidade">
+                <option value="" disabled selected>Selecione…</option>
+                <option>Clínica Geral</option><option>Cardiologia</option><option>Pediatria</option><option>Ginecologia</option><option>Ortopedia</option><option>Dermatologia</option><option>Neurologia</option><option>Enfermagem Geral</option>
+              </select>
+            </div>
+          </div>
+          <div class="config-row">
+            <div class="config-field">
+              <label for="cad-unidade">Unidade de atuação</label>
+              <select id="cad-unidade">
+                <option value="" disabled selected>Selecione…</option>
+                <option>Unidade Centro</option><option>Unidade Julia</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="fields-administrador" class="profile-fields-section" hidden>
+          <h4>Dados administrativos</h4>
+          <div class="config-row">
+            <div class="config-field">
+              <label for="cad-setor">Setor / departamento</label>
+              <input type="text" id="cad-setor" placeholder="Ex.: Tecnologia da Informação">
+            </div>
+            <div class="config-field">
+              <label for="cad-cargo">Cargo / função</label>
+              <input type="text" id="cad-cargo" placeholder="Ex.: Analista de Sistemas">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-acoes">
+          <button type="button" class="btn btn-ghost" id="btn-limpar-cadastro">Limpar</button>
+          <button type="submit" class="btn btn-primary" id="btn-salvar-usuario">Cadastrar usuário</button>
+        </div>
+      </form>
+    </div>
+
+    <aside>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Usuários cadastrados</span>
+          <span class="badge b-blue" id="users-count-badge">0</span>
+        </div>
+        <div class="users-busca">
+          <div class="search-input-wrap">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="search" class="filter-input" id="busca-usuarios-cadastrados" placeholder="Nome, CPF ou e-mail">
+          </div>
+        </div>
+        <div class="users-lista" id="users-list-container"></div>
+      </div>
+    </aside>
+  </div>
+</div>

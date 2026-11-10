@@ -1,25 +1,6 @@
 {
   "layout": "logs",
-  "titulo": "Logs de Sistema",
-  "breadcrumb": "Administração › Logs de Sistema",
-  "subtitulo": "Auditoria completa de todas as ações realizadas no sistema.",
-  "boxes": {
-    "stats": [
-      { "label": "Total de registros", "icon": "📝", "iconClass": "ic-blue", "value": "8", "note": "Auditoria geral", "noteClass": "note-muted" },
-      { "label": "Erros", "icon": "🚨", "iconClass": "ic-red", "value": "1", "note": "Falhas e exceções", "noteClass": "note-red" },
-      { "label": "Avisos", "icon": "⚠", "iconClass": "ic-yellow", "value": "2", "note": "Alertas de segurança", "noteClass": "note-orange" },
-      { "label": "Acessos", "icon": "👤", "iconClass": "ic-green", "value": "2", "note": "Logins e autenticações", "noteClass": "note-green" }
-    ],
-    "registros": [
-      { "id": "LOG-1001", "hora": "09:41:22", "data": "07/05/2026", "dataHora": "07/05/2026 09:41:22", "tipo": "Erro", "badge": "b-red", "dot": "danger", "acao": "Falha na conexão com banco de dados", "titulo": "Falha na conexão com banco de dados", "descricao": "Tempo limite atingido durante tentativa de conexão com a base de dados principal.", "usuario": "sistema", "modulo": "DB_CONN", "ip": "192.168.1.10", "meta": "Módulo: DB_CONN · Usuário: sistema · IP: 192.168.1.10" },
-      { "id": "LOG-1002", "hora": "09:38:14", "data": "07/05/2026", "dataHora": "07/05/2026 09:38:14", "tipo": "Informação", "badge": "b-blue", "dot": "primary", "acao": "Laudo do exame #EX-8819 emitido", "titulo": "Laudo do exame #EX-8819 emitido", "descricao": "Laudo do exame #EX-8819 (Raio-X Tórax) emitido e assinado digitalmente.", "usuario": "Dr. Paulo Ribeiro", "modulo": "EXAMES", "ip": "192.168.1.45", "meta": "Módulo: EXAMES · Usuário: Dr. Paulo Ribeiro · IP: 192.168.1.45" },
-      { "id": "LOG-1003", "hora": "09:35:07", "data": "07/05/2026", "dataHora": "07/05/2026 09:35:07", "tipo": "Aviso", "badge": "b-yellow", "dot": "warning", "acao": "Estoque de Insulina abaixo do mínimo", "titulo": "Estoque de Insulina abaixo do mínimo", "descricao": "Estoque de Insulina NPH na Unidade Sul atingiu o limite crítico de segurança.", "usuario": "sistema", "modulo": "ESTOQUE", "ip": "192.168.1.10", "meta": "Módulo: ESTOQUE · Usuário: sistema · Unidade: Sul" },
-      { "id": "LOG-1004", "hora": "09:31:55", "data": "07/05/2026", "dataHora": "07/05/2026 09:31:55", "tipo": "Acesso", "badge": "b-green", "dot": "success", "acao": "Login realizado com sucesso", "titulo": "Login realizado com sucesso", "descricao": "Usuário Denilson Barrios autenticado com perfil Administrador.", "usuario": "Denilson Barrios", "modulo": "AUTH", "ip": "192.168.1.1", "meta": "Módulo: AUTH · Usuário: Denilson Barrios · IP: 192.168.1.1" },
-      { "id": "LOG-1005", "hora": "09:28:43", "data": "07/05/2026", "dataHora": "07/05/2026 09:28:43", "tipo": "Informação", "badge": "b-blue", "dot": "primary", "acao": "Agendamento #10297 criado", "titulo": "Agendamento #10297 criado", "descricao": "Solicitação de agendamento realizada para Maria Santos em Pediatria.", "usuario": "Enf. Cláudia", "modulo": "AGENDAMENTOS", "ip": "192.168.1.22", "meta": "Módulo: AGENDAMENTOS · Usuário: Enf. Cláudia · IP: 192.168.1.22" },
-      { "id": "LOG-1006", "hora": "09:22:18", "data": "07/05/2026", "dataHora": "07/05/2026 09:22:18", "tipo": "Aviso", "badge": "b-yellow", "dot": "warning", "acao": "Tentativa de acesso não autorizado bloqueada", "titulo": "Tentativa de acesso não autorizado bloqueada", "descricao": "Usuário sem privilégios administrativos tentou acessar o painel de logs.", "usuario": "Carlos Braga", "modulo": "SEGURANÇA", "ip": "192.168.1.88", "meta": "Módulo: SEGURANÇA · Usuário: Carlos Braga · IP: 192.168.1.88" },
-      { "id": "LOG-1007", "hora": "16:15:30", "data": "06/05/2026", "dataHora": "06/05/2026 16:15:30", "tipo": "Acesso", "badge": "b-green", "dot": "success", "acao": "Logout realizado", "titulo": "Logout realizado", "descricao": "Sessão encerrada voluntariamente pelo usuário.", "usuario": "Dr. Arnaldo Luiz", "modulo": "AUTH", "ip": "192.168.1.15", "meta": "Módulo: AUTH · Usuário: Dr. Arnaldo Luiz · IP: 192.168.1.15" },
-      { "id": "LOG-1008", "hora": "14:10:00", "data": "06/05/2026", "dataHora": "06/05/2026 14:10:00", "tipo": "Informação", "badge": "b-blue", "dot": "primary", "acao": "Exame solicitado: #EX-8819", "titulo": "Exame solicitado: #EX-8819", "descricao": "Solicitação de exame Raio-X Tórax para a paciente Maria Santos.", "usuario": "Dr. Paulo Ribeiro", "modulo": "EXAMES", "ip": "192.168.1.45", "meta": "Módulo: EXAMES · Usuário: Dr. Paulo Ribeiro · Paciente: Maria Santos" }
-    ],
-    "paginacao": { "de": 1, "ate": 4, "total": 8 }
-  }
+  "titulo": "Logs de sistema",
+  "subtitulo": "Trilha de auditoria de todas as ações realizadas no sistema.",
+  "boxes": {}
 }

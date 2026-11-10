@@ -1,0 +1,69 @@
+<div class="page" id="page-perfil">
+  <div class="page-hd">
+    <div>
+      <nav class="breadcrumb">Sistema <span>›</span> <strong>Meu perfil</strong></nav>
+      <h1 class="page-title">Meu perfil</h1>
+      <p class="page-sub">Seus dados pessoais, foto e senha de acesso.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px">
+    <div class="perfil-capa"></div>
+    <div class="perfil-cabecalho">
+      <div class="perfil-avatar" id="perfil-avatar-big">
+        <span id="perfil-avatar-iniciais"></span>
+        <button class="perfil-avatar-btn" id="btn-alterar-foto" type="button" aria-label="Alterar foto" title="Alterar foto">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        </button>
+      </div>
+      <input type="file" id="input-foto-avatar" accept="image/*" hidden>
+      <div class="perfil-identidade">
+        <h2><span id="perfil-nome-hdr"></span> <span class="badge b-blue" id="perfil-cargo-badge"></span></h2>
+        <div class="perfil-meta" id="perfil-meta-hdr"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-lateral" style="grid-template-columns:minmax(0,1fr) 360px">
+    <div class="card card-body">
+      <div class="card-title" style="margin-bottom:18px">Dados pessoais</div>
+      <form id="form-edit-perfil" novalidate onsubmit="return false">
+        <div class="config-row">
+          <div class="config-field"><label for="perfil-edit-nome">Nome completo</label><input type="text" id="perfil-edit-nome" autocomplete="name"></div>
+          <div class="config-field"><label for="perfil-edit-email">E-mail</label><input type="email" id="perfil-edit-email" autocomplete="email"></div>
+        </div>
+        <div class="config-row">
+          <div class="config-field"><label for="perfil-edit-cargo">Cargo / função</label><input type="text" id="perfil-edit-cargo"></div>
+          <div class="config-field"><label for="perfil-edit-unidade">Unidade principal</label><select id="perfil-edit-unidade"><option value="">Selecione…</option><option>Unidade Centro</option><option>Unidade Julia</option></select></div>
+        </div>
+        <div class="config-row">
+          <div class="config-field"><label for="perfil-edit-telefone">Telefone</label><input type="tel" id="perfil-edit-telefone" autocomplete="tel" placeholder="(00) 00000-0000"></div>
+        </div>
+        <div class="form-acoes">
+          <button class="btn btn-primary" id="btn-salvar-perfil" type="button">Salvar alterações</button>
+        </div>
+      </form>
+    </div>
+
+    <aside>
+      <div class="card card-body">
+        <div class="card-title" style="margin-bottom:16px">Alterar senha</div>
+        <form id="form-alterar-senha" novalidate onsubmit="return false">
+          <div class="form-group"><label for="senha-atual">Senha atual</label><input type="password" id="senha-atual" autocomplete="current-password"></div>
+          <div class="form-group"><label for="senha-nova">Nova senha</label><input type="password" id="senha-nova" autocomplete="new-password" placeholder="Mínimo de 6 caracteres"></div>
+          <div class="form-group"><label for="senha-confirma">Confirmar nova senha</label><input type="password" id="senha-confirma" autocomplete="new-password"></div>
+          <button class="btn btn-outline btn-block" id="btn-alterar-senha" type="button">Atualizar senha</button>
+        </form>
+      </div>
+
+      <div class="card card-body">
+        <div class="card-title" style="margin-bottom:8px">Conta</div>
+        <dl class="info-lista">
+          <div><dt>Perfil de acesso</dt><dd id="perfil-info-perfil">—</dd></div>
+          <div><dt>CPF</dt><dd class="mono" id="perfil-info-cpf">—</dd></div>
+          <div><dt>Identificador</dt><dd class="mono" id="perfil-info-id">—</dd></div>
+        </dl>
+      </div>
+    </aside>
+  </div>
+</div>

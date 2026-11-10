@@ -35,6 +35,8 @@ function loadScript(relPath) {
 }
 
 loadScript('config/permissoes.js');
+loadScript('config/unidades.js');
+loadScript('api/mock-http.js');
 loadScript('api/crypto.js');
 loadScript('api/usuarios.js');
 loadScript('api/auth.js');

@@ -1,24 +1,6 @@
 {
   "layout": "agendamentos",
   "titulo": "Agendamentos",
-  "breadcrumb": "Administração › Agendamentos",
-  "subtitulo": "Gerencie e acompanhe todos os agendamentos do sistema.",
-  "boxes": {
-    "stats": [
-      { "label": "Total Hoje", "icon": "📅", "iconClass": "ic-blue", "value": "158", "note": "Agendamentos", "noteClass": "note-muted" },
-      { "label": "Confirmados", "icon": "✅", "iconClass": "ic-green", "value": "112", "note": "70.9% do total", "noteClass": "note-green" },
-      { "label": "Pendentes", "icon": "⏳", "iconClass": "ic-yellow", "value": "31", "note": "Aguardando confirmação", "noteClass": "note-orange" },
-      { "label": "Cancelados", "icon": "❌", "iconClass": "ic-red", "value": "15", "note": "9.5% do total", "noteClass": "note-red" }
-    ],
-    "lista": [
-      { "id": "#10291", "paciente": "Luciana Ferreira", "cpf": "123.456.789-00", "data": "07/05/2026", "horario": "13:20", "especialidade": "Clínica Geral", "medico": "Dr. Manoel Joaquim", "unidade": "Unidade Central", "status": "Confirmado", "badge": "b-green" },
-      { "id": "#10292", "paciente": "Marcos Oliveira", "cpf": "987.654.321-00", "data": "07/05/2026", "horario": "13:45", "especialidade": "Cardiologia", "medico": "Dr. Arnaldo Luiz", "unidade": "Unidade Oeste", "status": "Confirmado", "badge": "b-green" },
-      { "id": "#10293", "paciente": "Ana Paula Costa", "cpf": "456.789.123-00", "data": "07/05/2026", "horario": "14:00", "especialidade": "Ginecologia", "medico": "Dra. Heloísa Rocha", "unidade": "Unidade Sul", "status": "Pendente", "badge": "b-yellow" },
-      { "id": "#10294", "paciente": "Roberto Alves", "cpf": "321.654.987-00", "data": "07/05/2026", "horario": "14:30", "especialidade": "Ortopedia", "medico": "Dr. Carlos Mendes", "unidade": "Unidade Norte", "status": "Confirmado", "badge": "b-green" },
-      { "id": "#10295", "paciente": "Fernanda Lima", "cpf": "654.321.987-00", "data": "07/05/2026", "horario": "15:00", "especialidade": "Dermatologia", "medico": "Dra. Patrícia Souza", "unidade": "Unidade Leste", "status": "Cancelado", "badge": "b-red" },
-      { "id": "#10296", "paciente": "José Pereira", "cpf": "789.123.456-00", "data": "07/05/2026", "horario": "15:30", "especialidade": "Neurologia", "medico": "Dr. Paulo Ribeiro", "unidade": "Unidade Central", "status": "Pendente", "badge": "b-yellow" },
-      { "id": "#10297", "paciente": "Maria Santos", "cpf": "112.233.445-00", "data": "07/05/2026", "horario": "16:00", "especialidade": "Pediatria", "medico": "Dra. Camila Torres", "unidade": "Unidade Sul", "status": "Remarcado", "badge": "b-blue" }
-    ],
-    "paginacao": { "de": 1, "ate": 7, "total": 158 }
-  }
+  "subtitulo": "Acompanhe os agendamentos com validação de horário e regras de antecedência.",
+  "boxes": {}
 }

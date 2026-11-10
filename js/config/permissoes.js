@@ -11,13 +11,11 @@
  *
  * DECISÃO DE NEGÓCIO REGISTRADA (16/08/2026):
  *  - Administrador   → uso interno da equipe de TI (gestão completa do sistema).
- *  - Recepção        → time da recepção: Dashboard, Agendamentos, Consultas e
- *                       Exames (visualizar e inserir novos). Sem acesso a
- *                       Vacinação, Unidades, Logs ou Cadastro de Usuários.
+ *  - Recepção        → time da recepção: Dashboard, Agendamentos, Consultas,
+ *                       Exames (visualizar e inserir novos) e Vacinação.
+ *                       Sem acesso a Unidades, Logs ou Cadastro de Usuários.
  *  - Profissional da Saúde → mantido como já funcionava (tudo, exceto Logs e
- *                       Cadastro de Usuários). Registra aplicações de vacina.
- *                       ATUALIZAÇÃO (30/10/2026): 'vacinacao' não estava em
- *                       nenhum perfil, então a tela era inacessível para todos.
+ *                       Cadastro de Usuários).
  *  - Cidadão (antigo "Paciente") → o plano original era esse perfil só existir
  *                       como CADASTRO, com o acesso de verdade acontecendo só
  *                       pelo futuro aplicativo móvel (.NET MAUI). Ainda não
@@ -27,10 +25,18 @@
  *                       para o app móvel (ver ModelosCidadao.cs): só enxerga os
  *                       PRÓPRIOS Agendamentos, Consultas e Exames (nunca a lista
  *                       completa da equipe), sem Dashboard, Vacinação, Unidades,
- *                       Logs ou Cadastro de Usuários, e só no modo visualização
- *                       (não pode criar/editar — isso continua exclusivo de
- *                       Administrador e Recepção). O filtro "só meus dados" é
- *                       aplicado em app.js (goTo), não aqui.
+ *                       Logs ou Cadastro de Usuários. Não cria nem altera nada.
+ *                       O filtro "só meus dados" é aplicado em app.js, não aqui.
+ *
+ * ALINHAMENTO (10/11/2026):
+ *  - Laudo de exame: emitido pelo Profissional da Saúde (e pelo Administrador,
+ *    para testes). A Recepção NÃO emite laudo.
+ *  - Vacinação: a Recepção acessa a tela e registra aplicações de dose, sem
+ *    nenhuma senha/confirmação extra. Entrada de lote no estoque continua
+ *    restrita ao Administrador.
+ *  - Agendamentos: o Cidadão apenas ACEITA (confirma) ou RECUSA (cancela) o
+ *    agendamento que lhe foi atribuído — nunca altera. Alterar/remarcar é
+ *    exclusivo da Recepção (e do Administrador, para testes).
  *
  * IMPORTANTE — nada disto é validado no servidor, porque hoje não existe
  * servidor: é só o navegador decidindo o que mostrar. Quando a VPS existir,
@@ -49,7 +55,7 @@ const Permissoes = (() => {
   const PAGINAS_POR_PERFIL = {
     'Administrador': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades', 'logs', 'cadastro-usuarios'],
     'Profissional da Saúde': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades'],
-    'Recepção': ['dashboard', 'agendamentos', 'consultas', 'exames'],
+    'Recepção': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao'],
     // Cidadão e Paciente têm a mesma visão restrita: autoatendimento de
     // agendamentos, consultas e exames próprios.
     'Cidadão': ['agendamentos', 'consultas', 'exames'],
@@ -62,18 +68,14 @@ const Permissoes = (() => {
   // Perfis autorizados a cadastrar e gerenciar novos usuários no sistema.
   const PERFIS_QUE_GERENCIAM_USUARIOS = ['Administrador'];
 
-  // Ações protegidas usadas pelo middleware (AuthAPI.verificarAcesso).
-  // Ação que não está nesta tabela é NEGADA: esquecer de cadastrar uma ação
-  // nova não pode virar acesso liberado.
-  const PERFIS_POR_ACAO = {
-    gerenciar_atendimentos: PERFIS_QUE_GERENCIAM_ATENDIMENTOS,
-    cadastrar_usuarios: PERFIS_QUE_GERENCIAM_USUARIOS,
-    ver_logs: ['Administrador'],
-    gerenciar_unidades: ['Administrador'],
-    registrar_vacinacao: ['Administrador', 'Profissional da Saúde'],
-    gerenciar_estoque_vacinas: ['Administrador'],
-    atualizar_consultas: ['Administrador', 'Recepção', 'Profissional da Saúde']
-  };
+  // Perfis autorizados a registrar aplicações de vacina.
+  const PERFIS_QUE_REGISTRAM_VACINACAO = ['Administrador', 'Profissional da Saúde', 'Recepção'];
+
+  // Perfis autorizados a emitir (e assinar) laudos de exames.
+  const PERFIS_QUE_EMITEM_LAUDO = ['Administrador', 'Profissional da Saúde'];
+
+  // Perfis autorizados a registrar entrada de lotes de vacina no estoque.
+  const PERFIS_QUE_GERENCIAM_ESTOQUE_VACINA = ['Administrador'];
 
   function normalizarPerfil(perfil) {
     if (!perfil) return '';
@@ -114,10 +116,19 @@ const Permissoes = (() => {
     return PERFIS_QUE_GERENCIAM_USUARIOS.includes(norm) || PERFIS_QUE_GERENCIAM_USUARIOS.includes(perfil);
   }
 
-  function podeExecutarAcao(perfil, acao) {
-    const perfis = PERFIS_POR_ACAO[acao];
-    if (!perfis) return false;
-    return perfis.includes(normalizarPerfil(perfil)) || perfis.includes(perfil);
+  function podeRegistrarVacinacao(perfil) {
+    const norm = normalizarPerfil(perfil);
+    return PERFIS_QUE_REGISTRAM_VACINACAO.includes(norm) || PERFIS_QUE_REGISTRAM_VACINACAO.includes(perfil);
+  }
+
+  function podeEmitirLaudo(perfil) {
+    const norm = normalizarPerfil(perfil);
+    return PERFIS_QUE_EMITEM_LAUDO.includes(norm) || PERFIS_QUE_EMITEM_LAUDO.includes(perfil);
+  }
+
+  function podeGerenciarEstoqueVacina(perfil) {
+    const norm = normalizarPerfil(perfil);
+    return PERFIS_QUE_GERENCIAM_ESTOQUE_VACINA.includes(norm) || PERFIS_QUE_GERENCIAM_ESTOQUE_VACINA.includes(perfil);
   }
 
   // Página inicial para onde mandar o usuário logo após o login.
@@ -135,10 +146,14 @@ const Permissoes = (() => {
     perfilPodeAcessarPagina,
     podeGerenciarAtendimentos,
     podeCadastrarUsuarios,
-    podeExecutarAcao,
-    PERFIS_POR_ACAO,
+    podeRegistrarVacinacao,
+    podeEmitirLaudo,
+    podeGerenciarEstoqueVacina,
     paginaInicial
   };
 })();
 
 window.Permissoes = Permissoes;
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Permissoes;
+}

@@ -81,7 +81,8 @@ function loadScript(relPath) {
 }
 
 loadScript('config/permissoes.js');
-loadScript('render.js');
+loadScript('core/utils.js');
+loadScript('ui/render.js');
 
 // ==========================================
 // SUÍTE DE TESTES — TELA DE UNIDADES DE SAÚDE
@@ -117,7 +118,7 @@ test('3. Render: renderUnidades renderiza linhas na tabela corretamente', () => 
   window.Render.renderUnidades(root, dadosUnidades);
 
   assert.ok(tbody.innerHTML.length > 0, 'O tbody deve conter o HTML das unidades renderizadas');
-  assert.ok(tbody.innerHTML.includes('Hospital Central Municipal'), 'Deve conter o Hospital Central Municipal');
+  assert.ok(tbody.innerHTML.includes('Unidade Centro'), 'Deve conter a Unidade Centro');
   assert.ok(tbody.innerHTML.includes('data-action="view-unidade"'), 'Deve conter botão de ver unidade');
   assert.ok(tbody.innerHTML.includes('data-action="edit-unidade"'), 'Deve conter botão de editar unidade');
 });

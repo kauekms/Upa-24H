@@ -11,6 +11,7 @@
  *     400:      { success: false, error: string }  (RN01 ou Horário Indisponível)
  *
  *   PUT /agendamentos/alterar  (ou POST /agendamentos/alterar)
+ *     Restrito a Recepção e Administrador (403 para outros perfis).
  *     body:     { id, data, horario, medico, especialidade, unidade, solicitantePerfil }
  *     200:      { success: true, message: string, agendamento: {...} }
  *     400:      { success: false, error: string }  (RN02 ou Horário Indisponível)
@@ -34,7 +35,8 @@
  *
  * REGRAS DE NEGÓCIO IMPLEMENTADAS:
  *   - RN01: Solicitação de agendamento exige antecedência mínima de 24 horas.
- *   - RN02: Alterações e cancelamentos solicitados pelo cidadão exigem antecedência mínima de 24h.
+ *   - RN02: Recusa (cancelamento) solicitada pelo cidadão exige antecedência mínima de 24h.
+ *     Alterar/remarcar é exclusivo da Recepção e do Administrador.
  *   - RN03: Cancelamento administrativo (equipe/gestão) é permitido a qualquer momento, exigindo
  *           obrigatoriamente justificativa/motivo do cancelamento e registro em log de auditoria.
  *   - Verificação de Conflito de Horário: Impede que o mesmo médico ou unidade receba dois atendimentos
@@ -42,19 +44,21 @@
  * ============================================================================
  */
 const AgendamentosAPI = (() => {
+  const Http = (typeof window !== 'undefined' && window.MockHttp) || require('./mock-http.js');
+  const Unid = (typeof window !== 'undefined' && window.Unidades) || require('../config/unidades.js');
   const STORAGE_KEY = 'upa_agendamentos';
   const USE_MOCK_API = true;
   const API_BASE_URL = '';
 
   function seedInicial() {
     return [
-      { id: '#10291', paciente: 'Luciana Ferreira', cpf: '123.456.789-00', data: '07/05/2026', horario: '13:20', especialidade: 'Clínica Geral', medico: 'Dr. Manoel Joaquim', unidade: 'Unidade Central', status: 'Confirmado', badge: 'b-green' },
-      { id: '#10292', paciente: 'Marcos Oliveira', cpf: '987.654.321-00', data: '07/05/2026', horario: '13:45', especialidade: 'Cardiologia', medico: 'Dr. Arnaldo Luiz', unidade: 'Unidade Oeste', status: 'Confirmado', badge: 'b-green' },
-      { id: '#10293', paciente: 'Ana Paula Costa', cpf: '456.789.123-00', data: '07/05/2026', horario: '14:00', especialidade: 'Ginecologia', medico: 'Dra. Heloísa Rocha', unidade: 'Unidade Sul', status: 'Pendente', badge: 'b-yellow' },
-      { id: '#10294', paciente: 'Roberto Alves', cpf: '321.654.987-00', data: '07/05/2026', horario: '14:30', especialidade: 'Ortopedia', medico: 'Dr. Carlos Mendes', unidade: 'Unidade Norte', status: 'Confirmado', badge: 'b-green' },
-      { id: '#10295', paciente: 'Fernanda Lima', cpf: '654.321.987-00', data: '07/05/2026', horario: '15:00', especialidade: 'Dermatologia', medico: 'Dra. Patrícia Souza', unidade: 'Unidade Leste', status: 'Cancelado', badge: 'b-red' },
-      { id: '#10296', paciente: 'José Pereira', cpf: '789.123.456-00', data: '07/05/2026', horario: '15:30', especialidade: 'Neurologia', medico: 'Dr. Paulo Ribeiro', unidade: 'Unidade Central', status: 'Pendente', badge: 'b-yellow' },
-      { id: '#10297', paciente: 'Maria Santos', cpf: '112.233.445-00', data: '07/05/2026', horario: '16:00', especialidade: 'Pediatria', medico: 'Dra. Camila Torres', unidade: 'Unidade Sul', status: 'Remarcado', badge: 'b-blue' }
+      { id: '#10291', paciente: 'Luciana Ferreira', cpf: '123.456.789-00', data: '07/05/2026', horario: '13:20', especialidade: 'Clínica Geral', medico: 'Dr. Manoel Joaquim', unidade: 'Unidade Centro', status: 'Confirmado', badge: 'b-green' },
+      { id: '#10292', paciente: 'Marcos Oliveira', cpf: '987.654.321-00', data: '07/05/2026', horario: '13:45', especialidade: 'Cardiologia', medico: 'Dr. Arnaldo Luiz', unidade: 'Unidade Julia', status: 'Confirmado', badge: 'b-green' },
+      { id: '#10293', paciente: 'Ana Paula Costa', cpf: '456.789.123-00', data: '07/05/2026', horario: '14:00', especialidade: 'Ginecologia', medico: 'Dra. Heloísa Rocha', unidade: 'Unidade Julia', status: 'Pendente', badge: 'b-yellow' },
+      { id: '#10294', paciente: 'Roberto Alves', cpf: '321.654.987-00', data: '07/05/2026', horario: '14:30', especialidade: 'Ortopedia', medico: 'Dr. Carlos Mendes', unidade: 'Unidade Julia', status: 'Confirmado', badge: 'b-green' },
+      { id: '#10295', paciente: 'Fernanda Lima', cpf: '654.321.987-00', data: '07/05/2026', horario: '15:00', especialidade: 'Dermatologia', medico: 'Dra. Patrícia Souza', unidade: 'Unidade Julia', status: 'Cancelado', badge: 'b-red' },
+      { id: '#10296', paciente: 'José Pereira', cpf: '789.123.456-00', data: '07/05/2026', horario: '15:30', especialidade: 'Neurologia', medico: 'Dr. Paulo Ribeiro', unidade: 'Unidade Centro', status: 'Pendente', badge: 'b-yellow' },
+      { id: '#10297', paciente: 'Maria Santos', cpf: '112.233.445-00', data: '07/05/2026', horario: '16:00', especialidade: 'Pediatria', medico: 'Dra. Camila Torres', unidade: 'Unidade Julia', status: 'Remarcado', badge: 'b-blue' }
     ];
   }
 
@@ -66,7 +70,10 @@ const AgendamentosAPI = (() => {
         persist(seed);
         return seed;
       }
-      return JSON.parse(raw);
+      const lista = JSON.parse(raw);
+      // Migra nomes antigos de unidade para "Unidade Centro" / "Unidade Julia"
+      if (Unid.normalizarRegistros(lista)) persist(lista);
+      return lista;
     } catch {
       return seedInicial();
     }
@@ -218,7 +225,7 @@ const AgendamentosAPI = (() => {
     const horario = (dados.horario || dados.hora || '').trim();
     const especialidade = dados.especialidade;
     const medico = dados.medico;
-    const unidade = dados.unidade;
+    const unidade = Unid.normalizar(dados.unidade);
     const perfilOperador = dados.perfilSolicitante || dados.perfilOperador || window.App?.usuario?.perfil;
     const encaixeAdministrativo = dados.encaixeAdministrativo;
 
@@ -301,7 +308,7 @@ const AgendamentosAPI = (() => {
 
   /**
    * PUT /agendamentos/alterar
-   * Implementa RN02 (antecedência mínima 24h) e verificação de horário disponível.
+   * Exclusivo de Recepção/Administrador; verifica conflito de horário.
    */
   async function alterarAgendamento(dados = {}, operadorInfo = null, customAgora = null) {
     const id = dados.id;
@@ -321,47 +328,30 @@ const AgendamentosAPI = (() => {
     }
 
     const perfil = dados.perfilSolicitante || dados.perfilOperador || window.App?.usuario?.perfil;
-    const ehEquipe = ['Administrador', 'Recepção'].includes(perfil);
     const agora = customAgora || new Date();
 
-    // Regra RN02: Se solicitada pelo cidadão/paciente (ou não-equipe), a alteração exige
-    // antecedência mínima de 24h antes da data original agendada E nova data >= 24h.
-    if (!ehEquipe) {
-      const checkOriginal = verificarAntecedencia24h(itemOriginal.data, itemOriginal.horario || itemOriginal.hora, agora);
-      if (!checkOriginal.valido) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            regra: 'RN02',
-            codigoRegra: 'RN02',
-            error: 'RN02: Alterações e reagendamentos só são permitidos com antecedência mínima de 24 horas do horário agendado.'
-          }
-        };
-      }
+    // DECISÃO DE NEGÓCIO (10/11/2026): alterar/remarcar agendamento é exclusivo
+    // da Recepção (e do Administrador, para testes). O Cidadão só pode aceitar
+    // (confirmar) ou recusar (cancelar) o agendamento que lhe foi atribuído.
+    const podeAlterar = window.Permissoes?.podeGerenciarAtendimentos
+      ? window.Permissoes.podeGerenciarAtendimentos(perfil)
+      : ['Administrador', 'Recepção'].includes(perfil);
+    if (!podeAlterar) {
+      return {
+        status: 403,
+        body: {
+          success: false,
+          codigoRegra: 'PERFIL_SEM_PERMISSAO',
+          error: 'Somente a Recepção pode alterar agendamentos. O cidadão pode apenas aceitar ou recusar o agendamento.'
+        }
+      };
     }
 
     const novaData = dados.novaData || dados.data || itemOriginal.data;
     const novoHorario = dados.novaHora || dados.horario || dados.hora || itemOriginal.horario;
     const novoMedico = dados.medico || itemOriginal.medico;
-    const novaUnidade = dados.unidade || itemOriginal.unidade;
+    const novaUnidade = Unid.normalizar(dados.unidade) || itemOriginal.unidade;
     const novaEspec = dados.especialidade || itemOriginal.especialidade;
-
-    // Novo horário também deve respeitar 24h de antecedência se não for equipe administrativa
-    if (!ehEquipe) {
-      const checkNovo = verificarAntecedencia24h(novaData, novoHorario, agora);
-      if (!checkNovo.valido) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            regra: 'RN02',
-            codigoRegra: 'RN02',
-            error: 'RN02: O novo horário de agendamento deve ter antecedência mínima de 24 horas.'
-          }
-        };
-      }
-    }
 
     // Verificação de Conflito de Horário
     const checkDisponibilidade = verificarHorarioDisponivel(novoMedico, novaUnidade, novaData, novoHorario, id);
@@ -545,7 +535,7 @@ const AgendamentosAPI = (() => {
     }
 
     if (unidade && unidade !== 'Todas') {
-      lista = lista.filter(a => a.unidade === unidade);
+      lista = lista.filter(a => a.unidade === Unid.normalizar(unidade));
     }
 
     if (especialidade && especialidade !== 'Todas') {
@@ -629,80 +619,39 @@ const AgendamentosAPI = (() => {
     interceptado = true;
     const originalFetch = window.fetch.bind(window);
 
-    const ROTAS = ['/agendamentos', '/agendamentos/solicitar', '/agendamentos/alterar', '/agendamentos/confirmar', '/agendamentos/cancelar', '/agendamentos/indicadores'];
+    // Rotas com escrita: [rota exata, métodos aceitos, handler]
+    const rotasEscrita = [
+      ['/agendamentos/solicitar', ['POST'], solicitarAgendamento],
+      ['/agendamentos/alterar', ['PUT', 'POST'], alterarAgendamento],
+      ['/agendamentos/confirmar', ['POST'], confirmarAgendamento],
+      ['/agendamentos/cancelar', ['POST', 'DELETE'], cancelarAgendamento]
+    ];
 
     window.fetch = async (url, options = {}) => {
-      const Http = window.Http;
-      const rota = Http ? Http.caminho(url) : '';
-      if (!ROTAS.includes(rota)) return originalFetch(url, options);
-
       const method = Http.metodo(options);
-      const acesso = Http.autorizar(options);
-      if (!acesso.permitido) return Http.negado(acesso);
 
-      const perfil = acesso.perfil;
-      const operador = acesso.user?.nome || 'Sistema';
-      const ehCidadao = Http.ehCidadao(perfil);
-      const ehEquipe = window.Permissoes?.podeGerenciarAtendimentos(perfil);
-      const cpfSessao = Http.cpfLimpo(acesso.user?.cpf);
-      const proibido = (msg) => Http.json(403, { success: false, error: msg });
-
-      // Somente equipe (Administrador/Recepção) ou o próprio Cidadão alteram
-      // agendamentos. Profissional da Saúde atende, mas não agenda.
-      const podeMexerNoAgendamento = (id) => {
-        if (ehEquipe) return true;
-        if (!ehCidadao) return false;
-        const item = getAll().find(a => a.id === id);
-        return !item || Http.cpfLimpo(item.cpf) === cpfSessao; // inexistente → a API responde 404
-      };
-
-      try {
-        if (method === 'GET' && (rota === '/agendamentos' || rota === '/agendamentos/indicadores')) {
-          const filtros = Http.parametros(url);
-          if (ehCidadao) filtros.cpf = acesso.user?.cpf || '-'; // Cidadão só vê os próprios
-          const res = rota === '/agendamentos/indicadores' ? getIndicadores(filtros) : listarAgendamentos(filtros);
-          return Http.json(200, res);
-        }
-
-        const body = Http.corpo(options);
-        // O perfil declarado no corpo é ignorado: vale o da sessão.
-        const dados = { ...body, perfilSolicitante: perfil, perfilOperador: perfil };
-        if (!ehEquipe) {
-          delete dados.encaixeAdministrativo;
-          delete dados.tipo; // Cidadão não pode declarar cancelamento ADMINISTRATIVO
-        }
-
-        if (rota === '/agendamentos/solicitar' && method === 'POST') {
-          if (!ehEquipe && !ehCidadao) return proibido(`Acesso negado: perfil "${perfil}" não pode solicitar agendamentos.`);
-          if (ehCidadao && Http.cpfLimpo(dados.cpf) !== cpfSessao) {
-            return proibido('Acesso negado: o cidadão só pode solicitar agendamentos para o próprio CPF.');
+      for (const [rota, metodos, handler] of rotasEscrita) {
+        if (Http.exata(url, rota) && metodos.includes(method)) {
+          try {
+            const res = await handler(Http.corpo(options));
+            return Http.json(res.body, res.status);
+          } catch (err) {
+            return Http.json({ success: false, error: err.message }, 500);
           }
-          const res = await solicitarAgendamento(dados, operador);
-          return Http.json(res.status, res.body);
         }
-
-        if (rota === '/agendamentos/alterar' && (method === 'PUT' || method === 'POST')) {
-          if (!podeMexerNoAgendamento(dados.id)) return proibido('Acesso negado: agendamento de outro cidadão ou perfil sem permissão.');
-          const res = await alterarAgendamento(dados, operador);
-          return Http.json(res.status, res.body);
-        }
-
-        if (rota === '/agendamentos/confirmar' && method === 'POST') {
-          if (!podeMexerNoAgendamento(dados.id)) return proibido('Acesso negado: agendamento de outro cidadão ou perfil sem permissão.');
-          const res = await confirmarAgendamento(dados, operador);
-          return Http.json(res.status, res.body);
-        }
-
-        if (rota === '/agendamentos/cancelar' && (method === 'POST' || method === 'DELETE')) {
-          if (!podeMexerNoAgendamento(dados.id)) return proibido('Acesso negado: agendamento de outro cidadão ou perfil sem permissão.');
-          const res = await cancelarAgendamento(dados, operador);
-          return Http.json(res.status, res.body);
-        }
-
-        return Http.json(405, { success: false, error: 'Método não permitido.' });
-      } catch (err) {
-        return Http.json(500, { success: false, error: err.message });
       }
+
+      // GET /agendamentos/indicadores
+      if (Http.exata(url, '/agendamentos/indicadores') && method === 'GET') {
+        return Http.json(getIndicadores(Http.query(url)));
+      }
+
+      // GET /agendamentos
+      if (Http.exata(url, '/agendamentos') && method === 'GET') {
+        return Http.json(listarAgendamentos(Http.query(url)));
+      }
+
+      return originalFetch(url, options);
     };
   }
 

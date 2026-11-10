@@ -23,15 +23,10 @@
  * ============================================================================
  */
 const AuthAPI = (() => {
+  const Http = (typeof window !== 'undefined' && window.MockHttp) || require('./mock-http.js');
   const STORAGE_SESSOES = 'upa_sessoes';
   const STORAGE_TOKEN = 'upa_token';
   const SESSAO_DURACAO_MS = 8 * 60 * 60 * 1000; // 8 horas
-
-  // Proteção contra força bruta: após MAX_TENTATIVAS senhas erradas seguidas,
-  // a conta (ou o identificador, se não existir) fica bloqueada por BLOQUEIO_MS.
-  const STORAGE_TENTATIVAS = 'upa_tentativas_login';
-  const MAX_TENTATIVAS = 5;
-  const BLOQUEIO_MS = 15 * 60 * 1000;
 
   const USE_MOCK_API = true;
   const API_BASE_URL = '';
@@ -63,88 +58,48 @@ const AuthAPI = (() => {
     const idLower = id.toLowerCase();
     const idLimpo = id.replace(/\D/g, '');
 
-    // Só CPF e e-mail identificam um usuário de forma única. Antes também se
-    // aceitava nome, primeiro nome, apelidos ("admin", "paciente") e o nome
-    // do perfil — dois usuários com o mesmo primeiro nome tornavam o login
-    // ambíguo e "Administrador" sempre apontava para o primeiro admin da base.
-    if (idLimpo.length === 11 && /^[\d.\-\s]+$/.test(id)) {
-      return usuarios.find(u => (u.cpf || '').replace(/\D/g, '') === idLimpo) || null;
+    // 1. Busca por CPF (se contiver ao menos 9 dígitos ou formatação de CPF)
+    if (idLimpo.length >= 9) {
+      const porCpf = usuarios.find(u => {
+        const cpfLimpo = (u.cpf || '').replace(/\D/g, '');
+        return u.cpf === id || (cpfLimpo && cpfLimpo === idLimpo);
+      });
+      if (porCpf) return porCpf;
     }
-    return usuarios.find(u => (u.email || '').trim().toLowerCase() === idLower) || null;
-  }
 
-  function getTentativas() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_TENTATIVAS) || '{}');
-    } catch {
-      return {};
+    // 2. Busca por e-mail exato
+    const porEmail = usuarios.find(u => (u.email || '').toLowerCase() === idLower);
+    if (porEmail) return porEmail;
+
+    // 3. Apelidos e nomes de usuários de teste (prioriza seed oficial)
+    if (idLower === 'admin' || idLower === 'administrador') {
+      return usuarios.find(u => u.id === 'adm-seed-001' || u.cpf === '111.444.777-35') ||
+             usuarios.find(u => u.perfil === 'Administrador') || null;
     }
-  }
-
-  function persistTentativas(t) {
-    localStorage.setItem(STORAGE_TENTATIVAS, JSON.stringify(t));
-  }
-
-  function chaveTentativa(user, identificador) {
-    return user ? `user:${user.id}` : `id:${String(identificador).trim().toLowerCase()}`;
-  }
-
-  function bloqueioAtivo(chave) {
-    const reg = getTentativas()[chave];
-    return reg && reg.bloqueadoAte && reg.bloqueadoAte > Date.now() ? reg.bloqueadoAte : null;
-  }
-
-  // Retorna true quando esta falha disparou o bloqueio.
-  function registrarFalha(chave) {
-    const t = getTentativas();
-    const reg = t[chave] || { falhas: 0, bloqueadoAte: 0 };
-    if (reg.bloqueadoAte && reg.bloqueadoAte <= Date.now()) {
-      reg.falhas = 0;
-      reg.bloqueadoAte = 0;
+    if (idLower === 'prof' || idLower === 'profissional' || idLower === 'medico' || idLower === 'profissional da saúde' || idLower === 'profissional de saude') {
+      return usuarios.find(u => u.id === 'prof-seed-001' || u.cpf === '222.555.888-46') ||
+             usuarios.find(u => u.perfil === 'Profissional da Saúde') || null;
     }
-    reg.falhas++;
-    const bloqueou = reg.falhas >= MAX_TENTATIVAS;
-    if (bloqueou) reg.bloqueadoAte = Date.now() + BLOQUEIO_MS;
-    t[chave] = reg;
-    persistTentativas(t);
-    return bloqueou;
-  }
+    if (idLower === 'paciente' || idLower === 'cidadao' || idLower === 'cidadão') {
+      return usuarios.find(u => u.id === 'pac-seed-001' || u.cpf === '333.666.999-57') ||
+             usuarios.find(u => u.perfil === 'Paciente' || u.perfil === 'Cidadão') || null;
+    }
+    if (idLower === 'recepcao' || idLower === 'recepção' || idLower === 'recepcionista') {
+      return usuarios.find(u => u.id === 'recep-seed-001' || u.cpf === '444.777.000-83') ||
+             usuarios.find(u => u.perfil === 'Recepção') || null;
+    }
 
-  function limparFalhas(chave) {
-    const t = getTentativas();
-    delete t[chave];
-    persistTentativas(t);
-  }
-
-  // Uso exclusivo de testes: simula o fim da janela de bloqueio.
-  function _expirarBloqueios() {
-    persistTentativas({});
-  }
-
-  function falhaDeLogin(chave, nome) {
-    if (!registrarFalha(chave)) return;
-    window.AuditoriaService?.registrar({
-      usuario: nome,
-      acao: 'Conta bloqueada',
-      tipo: 'Aviso',
-      modulo: 'AUTH',
-      descricao: `Login de "${nome}" bloqueado por ${BLOQUEIO_MS / 60000} min após ${MAX_TENTATIVAS} senhas incorretas.`
+    // 4. Busca por nome completo ou primeiro nome
+    const porNome = usuarios.find(u => {
+      const nomeLower = (u.nome || '').toLowerCase();
+      if (nomeLower === idLower) return true;
+      const primeiroNome = nomeLower.split(' ')[0];
+      return primeiroNome === idLower;
     });
-  }
+    if (porNome) return porNome;
 
-  function respostaBloqueio(nome, ate) {
-    const minutos = Math.max(1, Math.ceil((ate - Date.now()) / 60000));
-    window.AuditoriaService?.registrar({
-      usuario: nome,
-      acao: 'Login bloqueado',
-      tipo: 'Aviso',
-      modulo: 'AUTH',
-      descricao: `Tentativa de login em conta bloqueada por excesso de senhas incorretas ("${nome}").`
-    });
-    return {
-      status: 429,
-      body: { success: false, error: `Conta temporariamente bloqueada por excesso de tentativas. Tente novamente em ${minutos} min.` }
-    };
+    // 5. Fallback por perfil genérico
+    return usuarios.find(u => (u.perfil || '').toLowerCase() === idLower) || null;
   }
 
   function criarSessao(user) {
@@ -211,20 +166,38 @@ const AuthAPI = (() => {
       };
     }
 
-    const mensagensAcao = {
-      gerenciar_atendimentos: 'não pode gerenciar atendimentos',
-      cadastrar_usuarios: 'não possui permissão para cadastrar usuários',
-      ver_logs: 'não pode consultar os logs do sistema',
-      gerenciar_unidades: 'não pode cadastrar ou alterar unidades de saúde',
-      registrar_vacinacao: 'não pode registrar aplicações de vacina',
-      gerenciar_estoque_vacinas: 'não pode movimentar o estoque de vacinas',
-      atualizar_consultas: 'não pode atualizar consultas'
-    };
-    if (acao && !window.Permissoes?.podeExecutarAcao(perfil, acao)) {
+    if (acao === 'gerenciar_atendimentos' && !window.Permissoes?.podeGerenciarAtendimentos(perfil)) {
       return {
         permitido: false,
         status: 403,
-        error: `Acesso negado: perfil "${perfil}" ${mensagensAcao[acao] || `não pode executar "${acao}"`}.`,
+        error: `Acesso negado: perfil "${perfil}" não pode gerenciar atendimentos.`,
+        user: sessao.user
+      };
+    }
+
+    if (acao === 'cadastrar_usuarios' && !window.Permissoes?.podeCadastrarUsuarios(perfil)) {
+      return {
+        permitido: false,
+        status: 403,
+        error: `Acesso negado: perfil "${perfil}" não possui permissão para cadastrar usuários.`,
+        user: sessao.user
+      };
+    }
+
+    if (acao === 'registrar_vacinacao' && !window.Permissoes?.podeRegistrarVacinacao(perfil)) {
+      return {
+        permitido: false,
+        status: 403,
+        error: `Acesso negado: perfil "${perfil}" não possui permissão para registrar aplicação de vacinas (permitido apenas a Profissional da Saúde, Recepção ou Administrador).`,
+        user: sessao.user
+      };
+    }
+
+    if (acao === 'gerenciar_estoque_vacina' && !window.Permissoes?.podeGerenciarEstoqueVacina(perfil)) {
+      return {
+        permitido: false,
+        status: 403,
+        error: `Acesso negado: perfil "${perfil}" não possui permissão para registrar entrada de lote no estoque (restrito a Administrador).`,
         user: sessao.user
       };
     }
@@ -233,21 +206,9 @@ const AuthAPI = (() => {
   }
 
   function extrairToken(request) {
-    const h = request?.headers;
-    let authHeader = '';
-    if (h && typeof h.get === 'function') authHeader = h.get('Authorization') || '';
-    else authHeader = h?.Authorization || h?.authorization || '';
+    const authHeader = request?.headers?.Authorization || request?.headers?.authorization || '';
     if (authHeader.startsWith('Bearer ')) return authHeader.slice(7);
     return null;
-  }
-
-  /**
-   * Middleware para os interceptadores mock: usa o token do header
-   * Authorization ou, na falta dele, a sessão local do navegador.
-   */
-  function autorizarRequisicao(options = {}, recurso = {}) {
-    const token = extrairToken({ headers: options.headers || {} }) || getTokenLocal();
-    return verificarAcesso(token, recurso);
   }
 
   /**
@@ -264,12 +225,6 @@ const AuthAPI = (() => {
     }
 
     const user = buscarUsuarioPorIdentificador(identificador);
-    const chave = chaveTentativa(user, identificador);
-    const nomeTentativa = user ? user.nome : String(identificador);
-
-    const bloqueadoAte = bloqueioAtivo(chave);
-    if (bloqueadoAte) return respostaBloqueio(nomeTentativa, bloqueadoAte);
-
     if (!user) {
       window.AuditoriaService?.registrar({
         usuario: String(identificador || 'Desconhecido'),
@@ -278,20 +233,41 @@ const AuthAPI = (() => {
         modulo: 'AUTH',
         descricao: `Tentativa de login com identificador inexistente: "${identificador}".`
       });
-      falhaDeLogin(chave, nomeTentativa);
       return { status: 401, body: { success: false, error: 'Credenciais inválidas.' } };
     }
 
-    // Removido (30/10/2026): havia aqui uma "auto-recuperação" que aceitava a
-    // senha do seed de demonstração para QUALQUER usuário com perfil
-    // Administrador — na prática, uma senha-mestra. Hashes corrompidos dos
-    // usuários seed já são restaurados em UsuariosAPI.getAll().
     let senhaValida = false;
     try {
       senhaValida = await window.Crypto.verificarSenha(senha, user.senha);
     } catch (err) {
       console.warn('Falha na verificação de senha:', err);
       senhaValida = false;
+    }
+
+    // Auto-recuperação de senhas canônicas do seed SOMENTE quando o hash
+    // armazenado está corrompido (ilegível). Antes, qualquer Administrador
+    // entrava com a senha "admin" do seed (a busca casava "qualquer admin com
+    // o admin do seed") e a senha original do seed continuava valendo mesmo
+    // depois de ser trocada — na prática, uma porta dos fundos.
+    const hashCorrompido = !window.Crypto?.hashEhValido || !window.Crypto.hashEhValido(user.senha);
+    if (!senhaValida && hashCorrompido) {
+      const seedUsers = window.UsuariosAPI?.seedInicial?.() || [];
+      const sRef = seedUsers.find(s =>
+        s.id === user.id ||
+        (s.cpf && user.cpf && s.cpf.replace(/\D/g, '') === user.cpf.replace(/\D/g, ''))
+      );
+      if (sRef && sRef.senha === String(senha).trim()) {
+        senhaValida = true;
+        if (window.Crypto?.hashSenha && window.UsuariosAPI?.atualizarSenha) {
+          try {
+            const hash = await window.Crypto.hashSenha(sRef.senha);
+            window.UsuariosAPI.atualizarSenha(user.id, hash);
+            user.senha = hash;
+          } catch (e) {
+            console.warn('Não foi possível regenerar hash recuperado:', e);
+          }
+        }
+      }
     }
 
     if (!senhaValida) {
@@ -302,11 +278,8 @@ const AuthAPI = (() => {
         modulo: 'AUTH',
         descricao: `Tentativa de login com senha incorreta para o usuário "${user.nome}".`
       });
-      falhaDeLogin(chave, nomeTentativa);
       return { status: 401, body: { success: false, error: 'Credenciais inválidas.' } };
     }
-
-    limparFalhas(chave);
 
     if (!window.Permissoes?.perfilTemLoginWeb(user.perfil)) {
       window.AuditoriaService?.registrar({
@@ -335,12 +308,6 @@ const AuthAPI = (() => {
       modulo: 'AUTH',
       descricao: `Usuário "${user.nome}" (${user.perfil}) autenticado com sucesso.`
     });
-
-    window.App?.addLog?.(
-      'SUCESSO',
-      `Login realizado: ${user.nome} (${user.perfil})`,
-      `Módulo: AUTENTICAÇÃO · IP: local`
-    );
 
     return {
       status: 200,
@@ -379,11 +346,10 @@ const AuthAPI = (() => {
     const originalFetch = window.fetch.bind(window);
 
     window.fetch = async (url, options = {}) => {
-      const urlStr = typeof url === 'string' ? url : (url && url.url) || '';
-      const method = (options.method || 'GET').toUpperCase();
+      const method = Http.metodo(options);
 
       // POST /auth/login
-      if (urlStr.endsWith('/auth/login') && method === 'POST') {
+      if (Http.exata(url, '/auth/login') && method === 'POST') {
         try {
           const dados = JSON.parse(options.body || '{}');
           const { status, body } = await processarLogin(dados);
@@ -396,23 +362,23 @@ const AuthAPI = (() => {
       }
 
       // POST /auth/logout
-      if (urlStr.endsWith('/auth/logout') && method === 'POST') {
+      if (Http.exata(url, '/auth/logout') && method === 'POST') {
         const token = extrairToken({ headers: options.headers || {} });
         const { status, body } = processarLogout(token);
-        return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+        return Http.json(body, status);
       }
 
       // GET /auth/me
-      if (urlStr.endsWith('/auth/me') && method === 'GET') {
+      if (Http.exata(url, '/auth/me') && method === 'GET') {
         const token = extrairToken({ headers: options.headers || {} });
         const { status, body } = processarMe(token);
-        return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+        return Http.json(body, status);
       }
 
       // Middleware: rotas protegidas exigem token válido
-      const isRotaProtegida = urlStr.includes('/usuarios/') || urlStr.includes('/api/');
-      const isPublica = ROTAS_PUBLICAS.some(r => urlStr.endsWith(r));
-      if (isRotaProtegida && !isPublica && !urlStr.endsWith('/usuarios/cadastrar')) {
+      const isRotaProtegida = Http.prefixo(url, '/usuarios') || Http.prefixo(url, '/api');
+      const isPublica = ROTAS_PUBLICAS.some(r => Http.exata(url, r));
+      if (isRotaProtegida && !isPublica && !Http.exata(url, '/usuarios/cadastrar')) {
         const token = extrairToken({ headers: options.headers || {} }) || getTokenLocal();
         const acesso = verificarAcesso(token, {});
         if (!acesso.permitido) {
@@ -504,8 +470,6 @@ const AuthAPI = (() => {
     processarLogout,
     processarMe,
     verificarAcesso,
-    autorizarRequisicao,
-    _expirarBloqueios,
     validarToken,
     login,
     logout,

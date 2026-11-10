@@ -230,14 +230,17 @@
   </div>
 
   <!-- Scripts do Sistema -->
-  <script src="js/config/permissoes.js"></script>
-  <script src="js/api/http.js"></script>
-  <script src="js/api/crypto.js"></script>
-  <script src="js/api/usuarios.js"></script>
-  <script src="js/api/auditoria.js"></script>
-  <script src="js/api/exames.js"></script>
-  <script src="js/api/auth.js"></script>
-  <script src="js/render.js"></script>
+  <script src="../../js/config/permissoes.js"></script>
+  <script src="../../js/config/unidades.js"></script>
+  <script src="../../js/api/mock-http.js"></script>
+  <script src="../../js/api/crypto.js"></script>
+  <script src="../../js/api/usuarios.js"></script>
+  <script src="../../js/api/auditoria.js"></script>
+  <script src="../../js/api/exames.js"></script>
+  <script src="../../js/api/vacinacao.js"></script>
+  <script src="../../js/api/auth.js"></script>
+  <script src="../../js/core/utils.js"></script>
+  <script src="../../js/ui/render.js"></script>
 
   <!-- Script Executor de Testes Puro JS -->
   <script>
@@ -543,6 +546,90 @@
           if (!tbody.innerHTML.includes('Hospital Teste')) {
             throw new Error('renderUnidades não preencheu o tbody corretamente');
           }
+        }
+      },
+      {
+        id: 'T16',
+        nome: 'Vacinação: POST /vacinacao/registrar-aplicacao (201, baixa estoque, indicadores e log)',
+        desc: 'Registra aplicação com sucesso, baixa 1 dose do lote, atualiza indicadores e grava no Log de Sistema.',
+        fn: async () => {
+          window.VacinacaoAPI.resetarParaSeed();
+          window.App = { usuario: { nome: 'Dra. Ana Beatriz Souza', perfil: 'Profissional da Saúde' }, data: {} };
+          const res = await fetch('/vacinacao/registrar-aplicacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              cidadao: 'Cidadão Teste Browser',
+              vacina: 'COVID-19 (Bivalente)',
+              lote: 'LOT-COV-2026A',
+              dose: '1ª Dose',
+              unidade: 'Unidade Central',
+              profissional: 'Enf. Cláudia',
+              dataHora: '09/11/2026 14:00'
+            })
+          });
+          if (res.status !== 201) throw new Error(`Esperado 201, obtido ${res.status}`);
+          const body = await res.json();
+          if (body.estoqueAtual.quantidade !== 24) throw new Error('Estoque não foi decrementado em 1 dose');
+          if (body.indicadores.dosesAplicadasTotal !== 9) throw new Error('Indicador de doses aplicadas não atualizou');
+        }
+      },
+      {
+        id: 'T17',
+        nome: 'Vacinação: Validações 409 (duplicada), 422 (vencido/zerado) e 403 (sem permissão)',
+        desc: 'Bloqueia dose duplicada para o mesmo cidadão, lote vencido, estoque zerado e perfil sem permissão.',
+        fn: async () => {
+          window.VacinacaoAPI.resetarParaSeed();
+          window.App = { usuario: { nome: 'Dra. Ana Beatriz Souza', perfil: 'Profissional da Saúde' }, data: {} };
+
+          const dup = await window.VacinacaoAPI.registrarAplicacao({
+            cidadao: 'Paulo Henrique',
+            vacina: 'COVID-19 (Bivalente)',
+            lote: 'LOT-COV-2026A',
+            dose: '2ª Dose',
+            unidade: 'Unidade Central',
+            profissional: 'Enf. Cláudia',
+            dataHora: '09/11/2026 14:10'
+          });
+          if (dup.status !== 409) throw new Error(`Esperado 409 para dose duplicada, obtido ${dup.status}`);
+
+          const venc = await window.VacinacaoAPI.registrarAplicacao({
+            cidadao: 'Teste Vencido',
+            vacina: 'Febre Amarela',
+            lote: 'LOT-FA-VENC',
+            dose: 'Dose Única',
+            unidade: 'Unidade Central',
+            profissional: 'Enf. Marcos',
+            dataHora: '09/11/2026 14:15'
+          });
+          if (venc.status !== 422) throw new Error(`Esperado 422 para lote vencido, obtido ${venc.status}`);
+
+          window.App.usuario = { nome: 'Carla Recepção', perfil: 'Recepção' };
+          const semPerm = await window.VacinacaoAPI.registrarAplicacao({
+            cidadao: 'Teste Permissão',
+            vacina: 'COVID-19 (Bivalente)',
+            lote: 'LOT-COV-2026A',
+            dose: '1ª Dose',
+            unidade: 'Unidade Central',
+            profissional: 'Enf. Cláudia',
+            dataHora: '09/11/2026 14:20'
+          });
+          if (semPerm.status !== 403) throw new Error(`Esperado 403 para Recepção, obtido ${semPerm.status}`);
+        }
+      },
+      {
+        id: 'T18',
+        nome: 'Vacinação: Alertas de baixo estoque (atenção) e estoque esgotado (crítico)',
+        desc: 'Gera alertas visíveis e registra geração de cada alerta no Log de Sistema.',
+        fn: async () => {
+          window.VacinacaoAPI.resetarParaSeed();
+          window.App = { usuario: { nome: 'Denilson Barrios', perfil: 'Administrador' }, data: {} };
+          const resAl = await fetch('/vacinacao/alertas');
+          const dataAl = await resAl.json();
+          if (!dataAl.success || dataAl.criticos < 1 || dataAl.atencao < 1) {
+            throw new Error('Alertas de nível crítico e atenção deveriam estar ativos');
+          }
+          window.VacinacaoAPI.resetarParaSeed();
         }
       }
     ];

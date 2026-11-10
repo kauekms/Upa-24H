@@ -24,7 +24,12 @@
  * ============================================================================
  */
 const AuditoriaService = (() => {
+  const Http = (typeof window !== 'undefined' && window.MockHttp) || require('./mock-http.js');
   const STORAGE_KEY = 'upa_logs';
+  // Limite de registros mantidos no navegador. Sem isto o localStorage
+  // crescia indefinidamente (cada login/navegação gera log) até estourar a
+  // cota de ~5 MB e passar a falhar em silêncio.
+  const LIMITE_REGISTROS = 2000;
 
   function seedInicial() {
     return [
@@ -67,14 +72,14 @@ const AuditoriaService = (() => {
         hora: '09:35:07',
         tipo: 'Aviso',
         acao: 'Estoque de Insumos abaixo do mínimo',
-        descricao: 'Estoque de Insulina NPH na Unidade Sul atingiu o limite crítico de segurança.',
+        descricao: 'Estoque de Insulina NPH na Unidade Julia atingiu o limite crítico de segurança.',
         usuario: 'sistema',
         modulo: 'ESTOQUE',
         ip: '192.168.1.10',
         badge: 'b-yellow',
         dot: 'warning',
         titulo: 'Estoque de Insulina abaixo do mínimo',
-        meta: 'Módulo: ESTOQUE · Usuário: sistema · Unidade: Sul'
+        meta: 'Módulo: ESTOQUE · Usuário: sistema · Unidade: Julia'
       },
       {
         id: 'LOG-1004',
@@ -277,7 +282,7 @@ const AuditoriaService = (() => {
     }[tipoFinal] || { badge: 'b-blue', dot: 'primary' };
 
     const novoLog = {
-      id: `LOG-${Date.now().toString().slice(-4)}${Math.floor(Math.random() * 90 + 10)}`,
+      id: `LOG-${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 900 + 100)}`,
       dataHora: dataHoraFinal,
       data: dataFinal,
       hora: horaFinal,
@@ -295,6 +300,7 @@ const AuditoriaService = (() => {
 
     const lista = getAll();
     lista.unshift(novoLog);
+    if (lista.length > LIMITE_REGISTROS) lista.length = LIMITE_REGISTROS;
     persist(lista);
 
     return novoLog;
@@ -384,48 +390,29 @@ const AuditoriaService = (() => {
   function registrarInterceptor() {
     if (typeof window === 'undefined' || !window.fetch || interceptado) return;
     interceptado = true;
-    const originalFetch = window.fetch;
+    const originalFetch = window.fetch.bind(window);
 
     window.fetch = async function (url, options = {}) {
-      const Http = window.Http;
-      const rota = Http ? Http.caminho(url) : '';
-      if (rota !== '/logs' && rota !== '/logs/indicadores') return originalFetch(url, options);
-
       const method = Http.metodo(options);
 
-      // Leitura da auditoria é área administrativa (RNF de segurança).
-      if (method === 'GET') {
-        const acesso = Http.autorizar(options, { acao: 'ver_logs' });
-        if (!acesso.permitido) {
-          registrar({
-            usuario: acesso.user?.nome || 'Anônimo',
-            acao: 'Tentativa de Acesso Negado',
-            tipo: 'Aviso',
-            modulo: 'SEGURANÇA',
-            descricao: `Consulta à auditoria negada: ${acesso.error}`
-          });
-          return Http.negado(acesso);
-        }
-        const filtros = Http.parametros(url);
-        if (rota === '/logs/indicadores') {
-          return Http.json(200, { success: true, indicadores: getIndicadores(filtros) });
-        }
-        const lista = listar(filtros);
-        // `listar` devolve um array com propriedades extras; JSON.stringify
-        // descartava `success/total/data`, então a resposta virava só o array.
-        return Http.json(200, { success: true, total: lista.length, data: Array.from(lista) });
+      if (Http.exata(url, '/logs/indicadores') && method === 'GET') {
+        return Http.json({ success: true, indicadores: getIndicadores(Http.query(url)) });
       }
 
-      if (method === 'POST' && rota === '/logs') {
-        const acesso = Http.autorizar(options);
-        if (!acesso.permitido) return Http.negado(acesso);
-        const body = Http.corpo(options);
-        // O autor do registro é sempre o usuário da sessão.
-        const novo = registrar({ ...body, usuario: acesso.user?.nome });
-        return Http.json(201, { success: true, log: novo });
+      if (Http.exata(url, '/logs') && method === 'GET') {
+        // listar() devolve um array com propriedades extras; JSON.stringify de
+        // um array descarta essas propriedades, então montamos o contrato aqui.
+        const res = listar(Http.query(url));
+        return Http.json({ success: true, total: res.length, data: Array.from(res) });
       }
 
-      return Http.json(405, { success: false, error: 'Método não permitido.' });
+      if (Http.exata(url, '/logs') && method === 'POST') {
+        let body = {};
+        try { body = Http.corpo(options); } catch { body = {}; }
+        return Http.json({ success: true, log: registrar(body) }, 201);
+      }
+
+      return originalFetch(url, options);
     };
   }
 

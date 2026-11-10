@@ -1,0 +1,76 @@
+<div class="page" id="page-configuracoes">
+  <div class="page-hd">
+    <div>
+      <nav class="breadcrumb">Sistema <span>›</span> <strong>Configurações</strong></nav>
+      <h1 class="page-title">Configurações</h1>
+      <p class="page-sub">Dados da conta, preferências do sistema, notificações e segurança.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary" id="btn-salvar-config" type="button">Salvar alterações</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="config-tabs" data-box="config-nav" role="tablist"></div>
+
+    <div class="config-body">
+      <section class="config-section active" data-section="perfil">
+        <div class="config-section-titulo">Dados da conta</div>
+        <p class="config-section-sub">Essas informações aparecem no cabeçalho e nos registros de auditoria.</p>
+        <div class="config-row">
+          <div class="config-field"><label for="cfg-nome">Nome completo</label><input type="text" id="cfg-nome"></div>
+          <div class="config-field"><label for="cfg-email">E-mail</label><input type="email" id="cfg-email"></div>
+        </div>
+        <div class="config-row">
+          <div class="config-field"><label for="cfg-cargo">Cargo</label><input type="text" id="cfg-cargo"></div>
+          <div class="config-field"><label for="cfg-unidade">Unidade</label><select id="cfg-unidade"><option value="">Selecione…</option><option>Unidade Centro</option><option>Unidade Julia</option></select></div>
+        </div>
+        <div class="config-row">
+          <div class="config-field"><label for="cfg-telefone">Telefone</label><input type="tel" id="cfg-telefone" placeholder="(00) 00000-0000"></div>
+        </div>
+      </section>
+
+      <section class="config-section" data-section="sistema">
+        <div class="config-section-titulo">Preferências do sistema</div>
+        <p class="config-section-sub">Ajustes de exibição aplicados a todas as listas.</p>
+        <div class="config-row">
+          <div class="config-field">
+            <label for="cfg-itens">Itens por página nas tabelas</label>
+            <select id="cfg-itens"><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option></select>
+          </div>
+          <div class="config-field">
+            <label for="cfg-fuso">Fuso horário</label>
+            <select id="cfg-fuso" disabled><option>Brasília (GMT-3)</option></select>
+            <small>Definido pela unidade de saúde.</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="config-section" data-section="notificacoes">
+        <div class="config-section-titulo">Notificações</div>
+        <p class="config-section-sub">Escolha quais avisos você deseja receber.</p>
+        <div data-box="notificacoes-list"></div>
+      </section>
+
+      <section class="config-section" data-section="seguranca">
+        <div class="config-section-titulo">Segurança</div>
+        <p class="config-section-sub">Proteção da sessão e do acesso à conta.</p>
+        <div class="config-row">
+          <div class="config-field">
+            <label for="cfg-timeout">Encerrar sessão após inatividade (minutos)</label>
+            <input type="number" id="cfg-timeout" min="0" max="240" step="5">
+            <small>Use 0 para nunca encerrar automaticamente.</small>
+          </div>
+          <div class="config-field">
+            <label for="cfg-ultimo-acesso">Último login registrado</label>
+            <input type="text" id="cfg-ultimo-acesso" readonly>
+          </div>
+        </div>
+        <label class="toggle-row" style="cursor:not-allowed">
+          <span class="toggle-info"><strong>Autenticação em dois fatores <span class="selo-em-breve">em breve</span></strong><span>Camada extra de proteção com aplicativo autenticador.</span></span>
+          <span class="switch"><input type="checkbox" id="cfg-2fa" disabled><span class="switch-slider"></span></span>
+        </label>
+      </section>
+    </div>
+  </div>
+</div>

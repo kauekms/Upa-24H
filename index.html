@@ -3,9 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UPA 24H – Saúde Pública Digital</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/variables.css">
+  <meta name="description" content="UPA 24H — Gestão de agendamentos, consultas, exames, vacinação e unidades de saúde.">
+  <meta name="theme-color" content="#0b1730">
+  <title>UPA 24H · Saúde Pública Digital</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%231f5eff'/%3E%3Cstop offset='1' stop-color='%2310a35a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Cpath d='M16 9v14M9 16h14' stroke='white' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
@@ -17,20 +23,29 @@
   <link rel="stylesheet" href="css/pages/configuracoes.css">
 </head>
 <body>
-  <div id="header-slot"></div>
+  <a class="skip-link" href="#screen-container">Pular para o conteúdo</a>
 
-  <div class="layout">
+  <div class="app-shell">
     <div id="sidebar-slot"></div>
-    <main id="screen-container">
-      <div class="loading-screen">Iniciando sistema...</div>
-    </main>
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+    <div class="app-main">
+      <div id="header-slot"></div>
+      <main id="screen-container" tabindex="-1">
+        <div class="loading-screen"><span class="spinner"></span>Iniciando sistema…</div>
+      </main>
+    </div>
   </div>
 
   <div id="app-modal" class="modal-backdrop"></div>
-  <div id="toast-container" class="toast-container"></div>
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
+  <!-- Configuração e utilitários -->
   <script src="js/config/permissoes.js"></script>
-  <script src="js/api/http.js"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/config/unidades.js"></script>
+  <script src="js/config/catalogos.js"></script>
+  <!-- Camada de dados (APIs simuladas no navegador) -->
+  <script src="js/api/mock-http.js"></script>
   <script src="js/api/crypto.js"></script>
   <script src="js/api/usuarios.js"></script>
   <script src="js/api/auth.js"></script>
@@ -38,12 +53,17 @@
   <script src="js/api/agendamentos.js"></script>
   <script src="js/api/consultas.js"></script>
   <script src="js/api/exames.js"></script>
-  <script src="js/api/unidades.js"></script>
   <script src="js/api/vacinacao.js"></script>
-  <script src="js/api/dashboard.js"></script>
-  <!-- Cópias das telas para abrir via file:// — gerado por `npm run build:fallbacks` -->
-  <script src="js/fallbacks.js"></script>
-  <script src="js/render.js"></script>
+  <!-- Cópias embutidas das telas para uso via file:// (gerado: npm run build) -->
+  <script src="js/generated/fallbacks.js"></script>
+  <!-- Interface -->
+  <script src="js/ui/render.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/ui/login.js"></script>
+  <script src="js/ui/modais-agendamentos.js"></script>
+  <script src="js/ui/modais-consultas.js"></script>
+  <script src="js/ui/modais-exames.js"></script>
+  <script src="js/ui/modais-vacinacao.js"></script>
+  <script src="js/ui/modais-gestao.js"></script>
 </body>
 </html>

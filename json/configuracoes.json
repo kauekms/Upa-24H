@@ -2,36 +2,51 @@
   "layout": "configuracoes",
   "titulo": "Configurações",
   "breadcrumb": "Sistema › Configurações",
-  "subtitulo": "Personalize o sistema, perfil e preferências de notificação.",
+  "subtitulo": "Dados da conta, preferências do sistema, notificações e segurança.",
   "boxes": {
     "secoes": [
-      { "id": "perfil", "label": "Perfil do Usuário" },
-      { "id": "sistema", "label": "Sistema" },
-      { "id": "notificacoes", "label": "Notificações" },
-      { "id": "seguranca", "label": "Segurança" }
+      {
+        "id": "perfil",
+        "label": "Conta"
+      },
+      {
+        "id": "sistema",
+        "label": "Sistema"
+      },
+      {
+        "id": "notificacoes",
+        "label": "Notificações"
+      },
+      {
+        "id": "seguranca",
+        "label": "Segurança"
+      }
     ],
-    "perfil": {
-      "nome": "Denilson Barrios",
-      "email": "denilson.barrios@saude.gov.br",
-      "cargo": "Gestor Geral",
-      "unidade": "Unidade Central",
-      "telefone": "(11) 98765-4321"
-    },
-    "sistema": {
-      "idioma": "pt-BR",
-      "fuso": "America/Sao_Paulo",
-      "itensPorPagina": 10
-    },
     "notificacoes": [
-      { "id": "email", "titulo": "Alertas por E-mail", "descricao": "Receber alertas críticos por e-mail", "ativo": true },
-      { "id": "push", "titulo": "Notificações Push", "descricao": "Alertas em tempo real no navegador", "ativo": true },
-      { "id": "estoque", "titulo": "Alertas de Estoque", "descricao": "Avisos quando insumos estiverem baixos", "ativo": true },
-      { "id": "manutencao", "titulo": "Manutenção Programada", "descricao": "Avisos de indisponibilidade do sistema", "ativo": false }
-    ],
-    "seguranca": {
-      "sessaoTimeout": 30,
-      "doisFatores": false,
-      "ultimoAcesso": "07/05/2026 09:31"
-    }
+      {
+        "id": "email",
+        "titulo": "Alertas por E-mail",
+        "descricao": "Receber alertas críticos por e-mail",
+        "ativo": true
+      },
+      {
+        "id": "push",
+        "titulo": "Notificações Push",
+        "descricao": "Alertas em tempo real no navegador",
+        "ativo": true
+      },
+      {
+        "id": "estoque",
+        "titulo": "Alertas de Estoque",
+        "descricao": "Avisos quando insumos estiverem baixos",
+        "ativo": true
+      },
+      {
+        "id": "manutencao",
+        "titulo": "Manutenção Programada",
+        "descricao": "Avisos de indisponibilidade do sistema",
+        "ativo": false
+      }
+    ]
   }
 }

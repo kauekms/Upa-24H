@@ -32,7 +32,11 @@
  * ============================================================================
  */
 const UsuariosAPI = (() => {
+  const Http = (typeof window !== 'undefined' && window.MockHttp) || require('./mock-http.js');
+  const Unid = (typeof window !== 'undefined' && window.Unidades) || require('../config/unidades.js');
   const STORAGE_KEY = 'upa_usuarios';
+  // Marca que a migração da base antiga (com usuários fictícios fixos) já rodou.
+  const STORAGE_MIGRACAO = 'upa_usuarios_migracao_v2';
 
   // ---- PONTO DE TROCA PARA A VPS (ver instruções no cabeçalho do arquivo) ----
   const USE_MOCK_API = true;
@@ -91,7 +95,7 @@ const UsuariosAPI = (() => {
         perfil: "Administrador",
         cargo: "Administrador Geral",
         setor: "Tecnologia da Informação",
-        unidade: "Unidade Central",
+        unidade: "Unidade Centro",
         telefone: "(11) 98765-4321",
         iniciais: "TE"
       },
@@ -104,7 +108,7 @@ const UsuariosAPI = (() => {
         perfil: "Profissional da Saúde",
         registro: "CRM/SP 123456",
         especialidade: "Clínica Geral",
-        unidade: "Unidade Central",
+        unidade: "Unidade Centro",
         cargo: "Médico Clínico",
         telefone: "(11) 98888-1234",
         iniciais: "CM"
@@ -129,7 +133,7 @@ const UsuariosAPI = (() => {
         email: "recepcao@saude.gov.br",
         senha: "recep123",
         perfil: "Recepção",
-        unidade: "Unidade Central",
+        unidade: "Unidade Centro",
         cargo: "Recepcionista",
         telefone: "(11) 96666-4321",
         iniciais: "MC"
@@ -139,9 +143,16 @@ const UsuariosAPI = (() => {
 
   function getAll() {
     let raw = localStorage.getItem(STORAGE_KEY);
-    if (raw && (raw.includes("Denilson Barrios") || raw.includes("Luciana Ferreira") || raw.includes("Marcos Oliveira"))) {
-      localStorage.removeItem(STORAGE_KEY);
-      raw = null;
+    // Migração única da base antiga. Antes esta checagem rodava a CADA leitura
+    // e apagava TODOS os usuários sempre que algum cadastro contivesse os nomes
+    // "Luciana Ferreira" ou "Marcos Oliveira" — que são cidadãos reais da base
+    // de demonstração. Cadastrar um deles apagava todo mundo na leitura seguinte.
+    if (!localStorage.getItem(STORAGE_MIGRACAO)) {
+      if (raw && raw.includes('Denilson Barrios')) {
+        localStorage.removeItem(STORAGE_KEY);
+        raw = null;
+      }
+      localStorage.setItem(STORAGE_MIGRACAO, '1');
     }
     let users = [];
     if (raw) {
@@ -155,7 +166,8 @@ const UsuariosAPI = (() => {
 
     // Garante que TODOS os usuários canônicos do seed existam e estejam com credenciais válidas
     const seed = seedInicial();
-    let precisaSalvar = (users.length === 0);
+    // Migra nomes antigos de unidade para "Unidade Centro" / "Unidade Julia"
+    let precisaSalvar = (users.length === 0) || Unid.normalizarRegistros(users);
 
     for (const sUser of seed) {
       const sCpfLimpo = (sUser.cpf || '').replace(/\D/g, '');
@@ -232,7 +244,7 @@ const UsuariosAPI = (() => {
   function cpfDisponivel(cpfBruto, ignorarId) {
     const limpo = String(cpfBruto || '').replace(/\D/g, '');
     if (!limpo) return true;
-    return !getAll().some(u => u.id !== ignorarId && u.cpf.replace(/\D/g, '') === limpo);
+    return !getAll().some(u => u.id !== ignorarId && String(u.cpf || '').replace(/\D/g, '') === limpo);
   }
 
   function emailDisponivel(emailBruto, ignorarId) {
@@ -271,6 +283,45 @@ const UsuariosAPI = (() => {
     }
 
     return { valido: true, mensagem: '' };
+  }
+
+  /**
+   * Atualiza dados cadastrais (Meu Perfil / Configurações). Antes, editar o
+   * próprio perfil só mudava a cópia em memória (App.usuario): ao recarregar a
+   * página a sessão era restaurada a partir desta base e as alterações sumiam.
+   * Campos sensíveis (id, cpf, senha, perfil) nunca são alterados por aqui.
+   */
+  function atualizarDados(id, campos = {}) {
+    const usuarios = getAll();
+    const usuario = usuarios.find(u => u.id === id);
+    if (!usuario) return { status: 404, body: { success: false, error: 'Usuário não encontrado.' } };
+
+    const permitidos = ['nome', 'email', 'cargo', 'unidade', 'telefone', 'avatarUrl'];
+    const novos = {};
+    for (const campo of permitidos) {
+      const bruto = campos[campo];
+      if (bruto === undefined || bruto === null) continue;
+      const valor = typeof bruto === 'string' ? bruto.trim() : bruto;
+      if (valor === '') continue;
+      novos[campo] = campo === 'unidade' ? Unid.normalizar(valor) : valor;
+    }
+
+    if (novos.email) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(novos.email)) {
+        return { status: 400, body: { success: false, error: 'Informe um e-mail em um formato válido.' } };
+      }
+      if (!emailDisponivel(novos.email, id)) {
+        return { status: 400, body: { success: false, error: 'Este e-mail já está em uso por outro usuário.' } };
+      }
+    }
+
+    Object.assign(usuario, novos);
+    if (novos.nome) {
+      usuario.iniciais = novos.nome.split(/\s+/).map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    }
+    persist(usuarios);
+    const { senha: _, ...safe } = usuario;
+    return { status: 200, body: { success: true, user: safe } };
   }
 
   function atualizarSenha(id, novoHash) {
@@ -330,6 +381,7 @@ const UsuariosAPI = (() => {
     const iniciais = nome.trim().split(/\s+/).map(n => n[0]).join('').substring(0, 2).toUpperCase();
     const novoUsuario = {
       ...dados,
+      ...(dados.unidade ? { unidade: Unid.normalizar(String(dados.unidade).trim()) } : {}),
       senha: senhaArmazenada,
       id: gerarId(perfil),
       cpf: formatarCPF(cpfCheck.limpo),
@@ -363,28 +415,10 @@ const UsuariosAPI = (() => {
     interceptado = true;
     const originalFetch = window.fetch.bind(window);
     window.fetch = async (url, options) => {
-      const urlStr = typeof url === 'string' ? url : (url && url.url) || '';
-      if (urlStr.endsWith('/usuarios/cadastrar')) {
+      if (Http.exata(url, '/usuarios/cadastrar')) {
         if (!options || options.method !== 'POST') {
           return new Response(JSON.stringify({ success: false, error: 'Método não permitido.' }), {
             status: 405, headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        // Antes esta rota não exigia autenticação nenhuma: qualquer visitante
-        // conseguia criar um Administrador com um POST direto.
-        const acesso = window.Http
-          ? window.Http.autorizar(options, { acao: 'cadastrar_usuarios' })
-          : { permitido: false, status: 401, error: 'Sessão inválida ou expirada.' };
-        if (!acesso.permitido) {
-          window.AuditoriaService?.registrar({
-            usuario: acesso.user?.nome || 'Anônimo',
-            acao: 'Cadastro de usuário negado',
-            tipo: 'Aviso',
-            modulo: 'SEGURANÇA',
-            descricao: acesso.error
-          });
-          return new Response(JSON.stringify({ success: false, error: acesso.error }), {
-            status: acesso.status, headers: { 'Content-Type': 'application/json' }
           });
         }
         try {
@@ -420,6 +454,8 @@ const UsuariosAPI = (() => {
     cadastrar,
     processarCadastro,
     atualizarSenha,
+    atualizarDados,
+    seedInicial,
     validarCPF,
     cpfDisponivel,
     emailDisponivel,
@@ -427,4 +463,5 @@ const UsuariosAPI = (() => {
   };
 })();
 
-window.UsuariosAPI = UsuariosAPI;
+if (typeof window !== 'undefined') window.UsuariosAPI = UsuariosAPI;
+if (typeof module !== 'undefined' && module.exports) module.exports = UsuariosAPI;

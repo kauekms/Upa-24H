@@ -1,0 +1,79 @@
+<div class="page" id="page-consultas">
+  <div class="page-hd">
+    <div>
+      <nav class="breadcrumb">Atendimento <span>›</span> <strong>Consultas</strong></nav>
+      <h1 class="page-title">Consultas médicas</h1>
+      <p class="page-sub">Registro, acompanhamento e agenda dos profissionais de saúde.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-outline" id="btn-ver-agenda-medico" type="button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Agenda do profissional
+      </button>
+      <button class="btn btn-primary" id="btn-nova-consulta" type="button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Nova consulta
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid" data-box="stats"></div>
+
+  <div class="grid-lateral">
+    <div class="card">
+      <div class="toolbar">
+        <div class="filters-row">
+          <div class="filter-group grow">
+            <label for="filter-consultas-busca">Buscar</label>
+            <div class="search-input-wrap">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input class="filter-input" id="filter-consultas-busca" type="search" placeholder="Cidadão ou CID">
+            </div>
+          </div>
+          <div class="filter-group">
+            <label for="filter-consultas-medico">Profissional</label>
+            <select class="filter-select" id="filter-consultas-medico">
+              <option value="">Todos</option>
+              <option>Dr. Manoel Joaquim</option><option>Dr. Arnaldo Luiz</option><option>Dra. Heloísa Rocha</option><option>Dr. Carlos Mendes</option><option>Dra. Patrícia Souza</option><option>Dr. Paulo Ribeiro</option><option>Dra. Camila Torres</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-consultas-especialidade">Especialidade</label>
+            <select class="filter-select" id="filter-consultas-especialidade">
+              <option value="">Todas</option>
+              <option>Clínica Geral</option><option>Cardiologia</option><option>Ginecologia</option><option>Ortopedia</option><option>Dermatologia</option><option>Pediatria</option><option>Neurologia</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-consultas-status">Status</label>
+            <select class="filter-select" id="filter-consultas-status">
+              <option value="">Todos</option>
+              <option>Agendada</option><option>Aguardando</option><option>Em Andamento</option><option>Concluída</option><option>Cancelada</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-ghost btn-sm" id="btn-limpar-consultas" type="button">Limpar filtros</button>
+          </div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Cidadão</th><th>Especialidade</th><th>Profissional</th><th>Início</th><th>Duração</th><th>Status</th><th>CID</th><th class="col-acoes">Ações</th></tr></thead>
+          <tbody data-box="consultas-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination"><span class="page-info"></span><div class="page-btns"></div></div>
+    </div>
+
+    <aside>
+      <div class="card card-padded">
+        <div class="card-title">Por especialidade</div>
+        <div data-box="consultas-especialidades"></div>
+      </div>
+      <div class="card card-padded">
+        <div class="card-title">Fila de espera</div>
+        <div data-box="fila-espera"></div>
+      </div>
+    </aside>
+  </div>
+</div>

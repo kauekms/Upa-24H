@@ -1,0 +1,69 @@
+<div class="page" id="page-unidades">
+  <div class="page-hd">
+    <div>
+      <nav class="breadcrumb">Saúde pública <span>›</span> <strong>Unidades de saúde</strong></nav>
+      <h1 class="page-title">Unidades de saúde</h1>
+      <p class="page-sub">Infraestrutura, capacidade e status operacional da rede.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-outline" id="btn-relatorio-insumos-unidades" type="button">Relatório de insumos</button>
+      <button class="btn btn-primary" id="btn-novo-chamado" type="button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Abrir chamado
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid" data-box="stats"></div>
+
+  <div class="card" style="margin-bottom:20px">
+    <div class="toolbar">
+      <div class="filters-row">
+        <div class="filter-group grow">
+          <label for="filter-unidades-busca">Buscar</label>
+          <div class="search-input-wrap">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input class="filter-input" id="filter-unidades-busca" type="search" placeholder="Nome ou endereço">
+          </div>
+        </div>
+        <div class="filter-group">
+          <label for="filter-unidades-tipo">Tipo</label>
+          <select class="filter-select" id="filter-unidades-tipo">
+            <option value="">Todos</option><option>Hospital</option><option>UPA</option><option>UBS</option><option>AME</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-unidades-status">Status</label>
+          <select class="filter-select" id="filter-unidades-status">
+            <option value="">Todos</option><option>Operacional</option><option>Manutenção</option><option>Inativa</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-ghost btn-sm" id="btn-limpar-unidades" type="button">Limpar filtros</button>
+        </div>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Unidade</th><th>Tipo</th><th>Endereço</th><th>Capacidade</th><th>Status</th><th class="col-acoes">Ações</th></tr></thead>
+        <tbody data-box="unidades-tbody"></tbody>
+      </table>
+    </div>
+    <div class="pagination"><span class="page-info"></span><div class="page-btns"></div></div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card card-padded">
+      <div class="card-title">Insumos da rede</div>
+      <div data-box="insumos-rows"></div>
+    </div>
+    <div class="card card-padded">
+      <div class="card-title">Distribuição por tipo</div>
+      <div data-box="distribuicao-rows"></div>
+    </div>
+    <div class="card card-padded">
+      <div class="card-title">Alertas das unidades</div>
+      <div data-box="alertas-rows"></div>
+    </div>
+  </div>
+</div>

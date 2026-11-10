@@ -1,11 +1,25 @@
-.vacinacao-grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
-.vacinacao-side{display:flex;flex-direction:column;gap:16px}
-.vax-panel-head{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted)}
-.vax-panel-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:center;padding:13px 0;border-bottom:1px solid var(--border)}
-.vax-panel-row:last-child{border-bottom:none}
-.faixa-item{margin-bottom:10px}
-.faixa-item:last-child{margin-bottom:0}
-.card-padded{padding:16px 20px}
-.card-padded-sm{padding:16px 18px}
-.card-padded .card-title{margin-bottom:14px}
-.card-padded-sm .card-title{margin-bottom:12px}
+/* Vacinação: banners de alerta de estoque (também usados no Dashboard) ------ */
+.vax-alerts-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.vax-alerts-container:empty { display: none; }
+
+.vax-alert-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px 16px; border-radius: var(--radius-lg); border: 1px solid;
+  font-size: 13px; line-height: 1.5;
+}
+.vax-alert-banner.nivel-critico { background: var(--danger-50); border-color: #fbd0d0; color: #7f1d1d; }
+.vax-alert-banner.nivel-atencao { background: var(--warning-50); border-color: #fde3a7; color: #78350f; }
+.vax-alert-left { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0; }
+.vax-alert-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-size: 16px; flex-shrink: 0; background: rgba(255, 255, 255, .7); }
+.vax-alert-title { font-weight: 700; font-size: 13.5px; }
+.vax-alert-desc { font-size: 12.5px; opacity: .85; }
+.vax-alert-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.vax-alert-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; background: rgba(255, 255, 255, .75); border: 1px solid; }
+.chip-critico { border-color: #f9b4b4; }
+.chip-atencao { border-color: #fcd679; }
+.btn-alerta-critico { background: #fff; border-color: #f9b4b4; color: var(--danger-700); }
+.btn-alerta-atencao { background: #fff; border-color: #fcd679; color: var(--warning-700); }
+
+@media (max-width: 760px) {
+  .vax-alert-banner { flex-direction: column; align-items: stretch; }
+}

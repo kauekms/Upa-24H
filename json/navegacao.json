@@ -1,14 +1,20 @@
 {
+  "secoes": [
+    { "id": "geral", "label": "Visão geral" },
+    { "id": "atendimento", "label": "Atendimento" },
+    { "id": "saude", "label": "Saúde pública" },
+    { "id": "admin", "label": "Administração" }
+  ],
   "itens": [
-    { "id": "dashboard", "label": "Dashboard", "arquivo": "dashboard.html", "css": ["css/pages/dashboard.css"], "json": "json/dashboard.json" },
-    { "id": "agendamentos", "label": "Agendamentos", "arquivo": "agendamentos.html", "css": [], "json": "json/agendamentos.json" },
-    { "id": "consultas", "label": "Consultas", "arquivo": "consultas.html", "css": ["css/pages/consultas.css"], "json": "json/consultas.json" },
-    { "id": "exames", "label": "Exames", "arquivo": "exames.html", "css": [], "json": "json/exames.json" },
-    { "id": "vacinacao", "label": "Vacinação", "arquivo": "vacinacao.html", "css": ["css/pages/vacinacao.css"], "json": "json/vacinacao.json" },
-    { "id": "unidades", "label": "Unidades de Saúde", "arquivo": "unidades.html", "css": ["css/pages/unidades.css"], "json": "json/unidades.json" },
-    { "id": "logs", "label": "Logs de Sistema", "arquivo": "logs.html", "css": ["css/pages/logs.css"], "json": "json/logs.json" },
-    { "id": "cadastro-usuarios", "label": "Cadastro de Usuários", "arquivo": "cadastro-usuarios.html", "css": ["css/pages/configuracoes.css"], "json": "json/usuario.json" },
-    { "id": "configuracoes", "label": "Configurações", "arquivo": "configuracoes.html", "css": ["css/pages/configuracoes.css"], "json": "json/configuracoes.json" },
-    { "id": "perfil", "label": "Meu Perfil", "arquivo": "perfil.html", "css": ["css/pages/configuracoes.css"], "json": "json/perfil.json" }
+    { "id": "dashboard", "label": "Dashboard", "secao": "geral", "arquivo": "pages/dashboard.html", "json": "json/dashboard.json" },
+    { "id": "agendamentos", "label": "Agendamentos", "secao": "atendimento", "arquivo": "pages/agendamentos.html", "json": "json/agendamentos.json" },
+    { "id": "consultas", "label": "Consultas", "secao": "atendimento", "arquivo": "pages/consultas.html", "json": "json/consultas.json" },
+    { "id": "exames", "label": "Exames", "secao": "atendimento", "arquivo": "pages/exames.html", "json": "json/exames.json" },
+    { "id": "vacinacao", "label": "Vacinação", "secao": "saude", "arquivo": "pages/vacinacao.html", "json": "json/vacinacao.json" },
+    { "id": "unidades", "label": "Unidades de Saúde", "secao": "saude", "arquivo": "pages/unidades.html", "json": "json/unidades.json" },
+    { "id": "logs", "label": "Logs de Sistema", "secao": "admin", "arquivo": "pages/logs.html", "json": "json/logs.json" },
+    { "id": "cadastro-usuarios", "label": "Cadastro de Usuários", "secao": "admin", "arquivo": "pages/cadastro-usuarios.html", "json": "json/cadastro-usuarios.json" },
+    { "id": "configuracoes", "label": "Configurações", "arquivo": "pages/configuracoes.html", "json": "json/configuracoes.json" },
+    { "id": "perfil", "label": "Meu Perfil", "arquivo": "pages/perfil.html", "json": "json/perfil.json" }
   ]
 }

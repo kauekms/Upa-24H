@@ -31,6 +31,8 @@ function loadScript(relPath) {
 }
 
 loadScript('config/permissoes.js');
+loadScript('config/unidades.js');
+loadScript('api/mock-http.js');
 loadScript('api/crypto.js');
 loadScript('api/usuarios.js');
 loadScript('api/auditoria.js');
@@ -228,7 +230,7 @@ test('8. ExamesAPI: POST /exames - Sucesso retorna status 201 e gera log de audi
     tipo: 'Hemograma Completo',
     data: '15/06/2026',
     horario: '08:30',
-    unidade: 'UPA 24h Central',
+    unidade: 'Unidade Centro',
     solicitante: 'Dr. Arnaldo Luiz'
   }, 'Dr. Roberto Admin');
 
@@ -255,7 +257,7 @@ test('9. ExamesAPI: POST /exames - Conflito de horário na mesma unidade é bloq
     tipo: 'Tomografia Crânio',
     data: '20/07/2026',
     horario: '10:00',
-    unidade: 'Hospital Central Municipal'
+    unidade: 'Unidade Centro'
   });
   assert.strictEqual(r1.status, 201);
 
@@ -265,7 +267,7 @@ test('9. ExamesAPI: POST /exames - Conflito de horário na mesma unidade é bloq
     tipo: 'Tomografia Crânio',
     data: '20/07/2026',
     horario: '10:00',
-    unidade: 'Hospital Central Municipal'
+    unidade: 'Unidade Centro'
   });
   assert.strictEqual(r2.status, 400, 'Deve retornar 400 por conflito de horário na unidade');
   assert.strictEqual(r2.body.success, false);
@@ -279,7 +281,7 @@ test('10. ExamesAPI: PUT /exames/:id - Exames concluídos não podem ser alterad
       paciente: 'Helena Silva',
       tipo: 'ECG',
       data: '01/04/2026',
-      unidade: 'UPA 24h Central',
+      unidade: 'Unidade Centro',
       status: 'Concluído'
     }
   ]);
@@ -309,20 +311,20 @@ test('12. ExamesAPI: PUT /exames/:id - Alteração válida retorna status 200 e 
       tipo: 'Urina Tipo I',
       data: '25/08/2026',
       horario: '07:30',
-      unidade: 'UBS Vila Nova',
+      unidade: 'Unidade Julia',
       status: 'Solicitado'
     }
   ]);
 
   const res = await ExamesAPI.alterar('EX-PENDENTE-1', {
     status: 'Em andamento',
-    unidade: 'UPA 24h Central'
+    unidade: 'Unidade Centro'
   }, 'Enf. Juliana');
 
   assert.strictEqual(res.status, 200, 'Status deve ser 200 OK');
   assert.strictEqual(res.body.success, true);
   assert.strictEqual(res.body.data.status, 'Em andamento');
-  assert.strictEqual(res.body.data.unidade, 'UPA 24h Central');
+  assert.strictEqual(res.body.data.unidade, 'Unidade Centro');
 
   const logs = AuditoriaService.getAll();
   assert.strictEqual(logs.length, 1);
@@ -379,9 +381,9 @@ test('15. ExamesAPI: Histórico do paciente retorna todos os exames realizados p
 
 test('16. ExamesAPI: Listagem com filtros combinados (status, busca e período)', (t) => {
   ExamesAPI.persist([
-    { id: 'EX-1', paciente: 'Bruna Lima', tipo: 'Hemograma', data: '05/03/2026', unidade: 'UPA 24h Central', status: 'Solicitado', dataPrevista: '2099-01-01' },
-    { id: 'EX-2', paciente: 'Bruna Lima', tipo: 'Raio-X', data: '10/03/2026', unidade: 'UPA 24h Central', status: 'Concluído', dataPrevista: '2020-01-01' },
-    { id: 'EX-3', paciente: 'Marcos Silva', tipo: 'ECG', data: '12/03/2026', unidade: 'UBS Vila Nova', status: 'Solicitado', dataPrevista: '2020-01-01' } // Atrasado
+    { id: 'EX-1', paciente: 'Bruna Lima', tipo: 'Hemograma', data: '05/03/2026', unidade: 'Unidade Centro', status: 'Solicitado', dataPrevista: '2099-01-01' },
+    { id: 'EX-2', paciente: 'Bruna Lima', tipo: 'Raio-X', data: '10/03/2026', unidade: 'Unidade Centro', status: 'Concluído', dataPrevista: '2020-01-01' },
+    { id: 'EX-3', paciente: 'Marcos Silva', tipo: 'ECG', data: '12/03/2026', unidade: 'Unidade Julia', status: 'Solicitado', dataPrevista: '2020-01-01' } // Atrasado
   ]);
 
   // Filtro por status Concluído

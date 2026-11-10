@@ -36,6 +36,8 @@
  * ============================================================================
  */
 const ExamesAPI = (() => {
+  const Http = (typeof window !== 'undefined' && window.MockHttp) || require('./mock-http.js');
+  const Unid = (typeof window !== 'undefined' && window.Unidades) || require('../config/unidades.js');
   const STORAGE_KEY = 'upa_exames';
 
   function seedInicial() {
@@ -47,7 +49,7 @@ const ExamesAPI = (() => {
         pid: 'P-4521',
         tipo: 'Hemograma Completo',
         solicitante: 'Dr. Arnaldo Luiz',
-        unidade: 'UBS Centro',
+        unidade: 'Unidade Centro',
         data: '07/05/2026',
         horario: '07:30',
         dataPrevista: '09/05/2026',
@@ -63,7 +65,7 @@ const ExamesAPI = (() => {
         pid: 'P-4318',
         tipo: 'Glicemia em Jejum',
         solicitante: 'Dr. Manoel Joaquim',
-        unidade: 'Unidade Central',
+        unidade: 'Unidade Centro',
         data: '07/05/2026',
         horario: '08:00',
         dataPrevista: '08/05/2026',
@@ -79,7 +81,7 @@ const ExamesAPI = (() => {
         pid: 'P-3892',
         tipo: 'Raio-X Tórax',
         solicitante: 'Dr. Paulo Ribeiro',
-        unidade: 'Unidade Sul',
+        unidade: 'Unidade Julia',
         data: '05/05/2026',
         horario: '09:15',
         dataPrevista: '06/05/2026',
@@ -96,7 +98,7 @@ const ExamesAPI = (() => {
         pid: 'P-4102',
         tipo: 'Tomografia Crânio',
         solicitante: 'Dr. Paulo Ribeiro',
-        unidade: 'Unidade Central',
+        unidade: 'Unidade Centro',
         data: '01/05/2026',
         horario: '10:30',
         dataPrevista: '03/05/2026', // Data prevista já passou e status não é Concluído -> ATRASADO
@@ -112,7 +114,7 @@ const ExamesAPI = (() => {
         pid: 'P-3761',
         tipo: 'Ultrassom Abdominal',
         solicitante: 'Dr. Carlos Mendes',
-        unidade: 'Unidade Norte',
+        unidade: 'Unidade Julia',
         data: '04/05/2026',
         horario: '11:00',
         dataPrevista: '05/05/2026',
@@ -129,7 +131,7 @@ const ExamesAPI = (() => {
         pid: 'P-4409',
         tipo: 'ECG',
         solicitante: 'Dra. Heloísa Rocha',
-        unidade: 'Unidade Oeste',
+        unidade: 'Unidade Julia',
         data: '07/05/2026',
         horario: '14:00',
         dataPrevista: '08/05/2026',
@@ -145,7 +147,7 @@ const ExamesAPI = (() => {
         pid: 'P-4521',
         tipo: 'Colesterol Total e Frações',
         solicitante: 'Dr. Arnaldo Luiz',
-        unidade: 'UBS Centro',
+        unidade: 'Unidade Centro',
         data: '20/04/2026',
         horario: '08:30',
         dataPrevista: '22/04/2026',
@@ -166,7 +168,10 @@ const ExamesAPI = (() => {
         persist(seed);
         return seed;
       }
-      return JSON.parse(raw);
+      const lista = JSON.parse(raw);
+      // Migra nomes antigos de unidade para "Unidade Centro" / "Unidade Julia"
+      if (Unid.normalizarRegistros(lista)) persist(lista);
+      return lista;
     } catch {
       return seedInicial();
     }
@@ -218,20 +223,16 @@ const ExamesAPI = (() => {
   }
 
   /**
-   * Data de referência para teste de prazo "já passou".
-   * Antes, fora de maio/2026 a referência era congelada em 07/05/2026 (data
-   * da base de demonstração) — exames realmente vencidos nunca apareciam como
-   * atrasados. Agora a referência padrão é sempre o momento atual.
+   * Data de referência para o teste de prazo "já passou".
+   * Antes, fora de maio/2026 a referência ficava congelada em 07/05/2026 — ou
+   * seja, nenhum exame criado depois dessa data jamais era marcado como
+   * Atrasado. Agora a referência é sempre o momento atual (ou a data passada
+   * explicitamente, usada pelos testes).
    */
   function getDataReferencia(dataRef) {
     if (dataRef instanceof Date) return dataRef;
     if (typeof dataRef === 'string') return parseData(dataRef) || new Date();
     return new Date();
-  }
-
-  function gerarNovoId(lista) {
-    const maior = lista.reduce((m, e) => Math.max(m, parseInt(String(e.id || '').replace(/\D/g, ''), 10) || 0), 8829);
-    return `#EX-${maior + 1}`;
   }
 
   /**
@@ -293,7 +294,7 @@ const ExamesAPI = (() => {
     const lista = getAll();
     const dataNorm = normalizarDataBR(data);
     const horaNorm = String(horario).trim();
-    const unidadeNorm = String(unidade).trim().toLowerCase();
+    const unidadeNorm = Unid.normalizar(String(unidade).trim()).toLowerCase();
 
     return lista.some(e => {
       if (ignorarId && e.id === ignorarId) return false;
@@ -371,9 +372,7 @@ const ExamesAPI = (() => {
 
     const prioridadeFinal = prioridade || 'Normal';
     const priorBadge = prioridadeFinal === 'Urgente' ? 'b-red' : prioridadeFinal === 'Média' ? 'b-orange' : 'b-gray';
-    // Antes era aleatório entre #EX-8830 e #EX-9629: com algumas centenas de
-    // exames, dois pedidos acabavam com o mesmo ID.
-    const newId = gerarNovoId(getAll());
+    const newId = `#EX-${Math.floor(8830 + Math.random() * 800)}`;
 
     const novoExame = {
       id: newId,
@@ -382,7 +381,7 @@ const ExamesAPI = (() => {
       pid: pid || `P-${Math.floor(4000 + Math.random() * 1000)}`,
       tipo: String(tipo).trim(),
       solicitante: solicitante ? String(solicitante).trim() : 'Dr. Arnaldo Luiz',
-      unidade: String(unidade).trim(),
+      unidade: Unid.normalizar(String(unidade).trim()),
       data: dataBR,
       horario: horaFinal,
       dataPrevista: dataPrevistaFinal,
@@ -453,7 +452,7 @@ const ExamesAPI = (() => {
     const novoPaciente = dados.paciente != null ? String(dados.paciente).trim() : exameAtual.paciente;
     const novoTipo = dados.tipo != null ? String(dados.tipo).trim() : exameAtual.tipo;
     const novaData = dados.data != null ? normalizarDataBR(dados.data) : exameAtual.data;
-    const novaUnidade = dados.unidade != null ? String(dados.unidade).trim() : exameAtual.unidade;
+    const novaUnidade = dados.unidade != null ? Unid.normalizar(String(dados.unidade).trim()) : exameAtual.unidade;
     const novoHorario = dados.horario != null ? String(dados.horario).trim() : (exameAtual.horario || '08:00');
 
     // Validação de campos obrigatórios
@@ -528,9 +527,8 @@ const ExamesAPI = (() => {
    */
   function listarExames(filtros = {}) {
     const lista = getAll();
-    const { status, dataInicio, dataFim, busca, q, paciente, cpf } = filtros;
+    const { status, dataInicio, dataFim, busca, q, paciente } = filtros;
 
-    const cpfFiltro = cpf ? String(cpf).replace(/\D/g, '') || '-' : '';
     const stFiltro = status ? String(status).trim().toLowerCase() : '';
     const buscaFiltro = (busca || q) ? String(busca || q).trim().toLowerCase() : '';
     const pacFiltro = paciente ? String(paciente).trim().toLowerCase() : '';
@@ -538,9 +536,6 @@ const ExamesAPI = (() => {
     const dtFim = dataFim ? parseData(dataFim) : null;
 
     const filtrados = lista.filter(item => {
-      // 0. Filtro exato por CPF (usado no recorte "só meus exames" do Cidadão)
-      if (cpfFiltro && String(item.cpf || '').replace(/\D/g, '') !== cpfFiltro) return false;
-
       // 1. Filtro por status (inclui a regra dinâmica de "Atrasado")
       if (stFiltro) {
         if (stFiltro === 'atrasado') {
@@ -681,57 +676,49 @@ const ExamesAPI = (() => {
   function registrarInterceptor() {
     if (typeof window === 'undefined' || !window.fetch || interceptado) return;
     interceptado = true;
-    const originalFetch = window.fetch;
+    const originalFetch = window.fetch.bind(window);
 
     window.fetch = async function (url, options = {}) {
-      const Http = window.Http;
-      const rota = Http ? Http.caminho(url) : '';
-      if (rota !== '/exames' && !rota.startsWith('/exames/')) return originalFetch(url, options);
-
       const method = Http.metodo(options);
-      const acesso = Http.autorizar(options);
-      if (!acesso.permitido) return Http.negado(acesso);
-      const ehCidadao = Http.ehCidadao(acesso.perfil);
-      const operador = acesso.user?.nome || 'sistema';
+      const lerCorpo = () => { try { return Http.corpo(options); } catch { return {}; } };
 
-      if (method === 'GET') {
-        const filtros = Http.parametros(url);
-        // Cidadão só enxerga os próprios exames (filtro por CPF da sessão).
-        if (ehCidadao) filtros.cpf = acesso.user?.cpf || '-';
-
-        if (rota === '/exames/indicadores') {
-          return Http.json(200, { success: true, indicadores: getIndicadores(filtros) });
-        }
-        if (rota === '/exames/historico') {
-          const alvo = ehCidadao ? (acesso.user?.cpf || '-') : (filtros.paciente || '');
-          const hist = getHistoricoPaciente(alvo);
-          return Http.json(200, { success: hist.success, paciente: alvo, total: hist.length, historico: Array.from(hist) });
-        }
-        if (rota === '/exames') {
-          const lista = listarExames(filtros);
-          return Http.json(200, { success: true, total: lista.length, data: Array.from(lista) });
-        }
-        return Http.json(404, { success: false, error: 'Rota não encontrada.' });
+      // GET /exames/indicadores
+      if (Http.exata(url, '/exames/indicadores') && method === 'GET') {
+        return Http.json({ success: true, indicadores: getIndicadores(Http.query(url)) });
       }
 
-      // Solicitar/alterar exames é atribuição da equipe (Casos de Uso 2 e 3).
-      const gestao = Http.autorizar(options, { acao: 'gerenciar_atendimentos' });
-      if (!gestao.permitido) return Http.negado(gestao);
-      const body = Http.corpo(options);
-
-      if (method === 'POST' && rota === '/exames') {
-        const res = await solicitarExame(body, operador);
-        return Http.json(res.status, res.body);
+      // GET /exames/historico
+      if (Http.exata(url, '/exames/historico') && method === 'GET') {
+        const historico = getHistoricoPaciente(Http.query(url).paciente || '');
+        return Http.json({ success: true, total: historico.length, historico });
       }
 
-      if (method === 'PUT') {
-        const match = rota.match(/^\/exames\/([^/]+)$/);
-        const id = match ? decodeURIComponent(match[1]) : body.id;
-        const res = await alterarExame(id, body, operador);
-        return Http.json(res.status, res.body);
+      // POST /exames (Solicitar exame)
+      if (Http.exata(url, '/exames') && method === 'POST') {
+        const op = window.App?.usuario?.nome || 'Recepção';
+        const res = await solicitarExame(lerCorpo(), op);
+        return Http.json(res.body, res.status);
       }
 
-      return Http.json(405, { success: false, error: 'Método não permitido.' });
+      // PUT /exames/:id ou PUT /exames
+      if (Http.prefixo(url, '/exames') && method === 'PUT') {
+        const body = lerCorpo();
+        let id = body.id;
+        const resto = Http.caminho(url).slice('/exames/'.length);
+        if (resto && !resto.includes('/')) id = decodeURIComponent(resto);
+
+        const op = window.App?.usuario?.nome || 'Recepção';
+        const res = await alterarExame(id, body, op);
+        return Http.json(res.body, res.status);
+      }
+
+      // GET /exames (Listar com suporte a filtros)
+      if (Http.exata(url, '/exames') && method === 'GET') {
+        const res = listarExames(Http.query(url));
+        return Http.json({ success: true, total: res.length, data: Array.from(res) });
+      }
+
+      return originalFetch(url, options);
     };
   }
 

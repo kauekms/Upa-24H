@@ -1,39 +1,6 @@
 {
   "layout": "vacinacao",
-  "titulo": "Campanha de Vacinação",
-  "breadcrumb": "Administração › Vacinação",
-  "subtitulo": "Monitoramento de doses, coberturas e estoques das vacinas.",
-  "boxes": {
-    "stats": [
-      { "label": "Doses Aplicadas Hoje", "icon": "💉", "iconClass": "ic-green", "value": "348", "note": "↑ +8% vs ontem", "noteClass": "note-green" },
-      { "label": "Total Este Mês", "icon": "📊", "iconClass": "ic-blue", "value": "4.821", "note": "Doses no mês", "noteClass": "note-muted" },
-      { "label": "Cobertura Vacinal", "icon": "🛡", "iconClass": "ic-teal", "value": "78.4%", "bar": 78.4, "barClass": "bar-green" },
-      { "label": "Estoque Crítico", "icon": "⚠", "iconClass": "ic-red", "value": "2", "note": "Vacinas em alerta", "noteClass": "note-red" }
-    ],
-    "vacinas": [
-      { "nome": "COVID-19 (Bivalente)", "detalhe": "mRNA · 2ª dose", "icone": "💉", "icoBg": "#dcfce7", "estoque": "1.240", "cobertura": 82, "status": "Normal", "badge": "b-green" },
-      { "nome": "Influenza", "detalhe": "Dose única", "icone": "🩸", "icoBg": "#fef9c3", "estoque": "890", "cobertura": 71, "status": "Atenção", "badge": "b-yellow", "barColor": "var(--warning)" },
-      { "nome": "Hepatite B", "detalhe": "3 doses", "icone": "🔵", "icoBg": "#e8f2fb", "estoque": "540", "cobertura": 88, "status": "Normal", "badge": "b-green" },
-      { "nome": "Febre Amarela", "detalhe": "Dose única", "icone": "🟣", "icoBg": "#f3e8ff", "estoque": "45", "estoqueCritico": true, "cobertura": 55, "status": "Crítico", "badge": "b-red", "barColor": "var(--accent2)" },
-      { "nome": "Meningite ACWY", "detalhe": "Dose única", "icone": "🔴", "icoBg": "#fef2f2", "estoque": "28", "estoqueCritico": true, "cobertura": 42, "status": "Crítico", "badge": "b-red", "barColor": "var(--danger)" }
-    ],
-    "aplicacoes": [
-      { "paciente": "Paulo Henrique", "vacina": "COVID-19", "dose": "2ª dose", "dataHora": "07/05 12:14", "profissional": "Enf. Cláudia", "unidade": "Unidade Norte" },
-      { "paciente": "Marina Gomes", "vacina": "Influenza", "dose": "Única", "dataHora": "07/05 12:08", "profissional": "Enf. Rodrigo", "unidade": "Unidade Sul" },
-      { "paciente": "Antônio Silva", "vacina": "Hepatite B", "dose": "1ª dose", "dataHora": "07/05 11:52", "profissional": "Enf. Cláudia", "unidade": "Unidade Central" },
-      { "paciente": "Beatriz Nunes", "vacina": "Febre Amarela", "dose": "Única", "dataHora": "07/05 11:40", "profissional": "Enf. Marcos", "unidade": "Unidade Oeste" }
-    ],
-    "faixasEtarias": [
-      { "faixa": "0–2 anos", "pct": 94, "color": "success" },
-      { "faixa": "3–12 anos", "pct": 89, "color": "success" },
-      { "faixa": "13–17 anos", "pct": 72, "color": "warning" },
-      { "faixa": "18–59 anos", "pct": 68, "color": "primary" },
-      { "faixa": "60+ anos", "pct": 91, "color": "success" }
-    ],
-    "insumos": [
-      { "nome": "Vacinas COVID-19", "icone": "💉", "icoBg": "#e6f9f7", "pct": 82, "color": "success" },
-      { "nome": "Estoque de Sangue", "icone": "🩸", "icoBg": "#fef2f2", "pct": 64, "color": "warning" },
-      { "nome": "EPIs Críticos", "icone": "🦺", "icoBg": "#fef9c3", "pct": 12, "color": "danger" }
-    ]
-  }
+  "titulo": "Campanha de vacinação",
+  "subtitulo": "Cobertura vacinal, controle de lotes em estoque e registro de aplicações.",
+  "boxes": {}
 }

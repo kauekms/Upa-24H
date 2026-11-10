@@ -1,37 +1,80 @@
 #!/usr/bin/env node
 /**
- * Gera js/fallbacks.js com cópias de todas as telas (HTML) e dados (JSON)
- * listados em json/navegacao.json, mais header/sidebar.
+ * Gera js/generated/fallbacks.js a partir dos arquivos reais de pages/,
+ * partials/ e json/.
  *
- * Por que existe: aberto direto do disco (file://), o navegador bloqueia o
- * fetch dos arquivos e o app usa estas cópias. Elas ficavam escritas à mão
- * dentro de app.js e, em 30/10/2026, 18 de 22 estavam desatualizadas.
+ * POR QUE ISTO EXISTE
+ * Quando o sistema é aberto direto do disco (file://index.html), o navegador
+ * bloqueia fetch() de arquivos locais. Para funcionar assim mesmo, o app usa
+ * cópias embutidas do HTML/JSON de cada tela. Antes essas cópias eram
+ * mantidas À MÃO dentro de app.js (~1.000 linhas) e 19 das 23 já estavam
+ * diferentes dos arquivos reais — o sistema se comportava de um jeito via
+ * servidor e de outro via file://.
  *
- * Uso: npm run build:fallbacks   (o teste tests/fallbacks.test.js acusa se esquecer)
+ * Agora as cópias são geradas automaticamente:
+ *   npm run build          → regenera o arquivo
+ *   npm test               → falha se o arquivo estiver desatualizado
  */
 const fs = require('node:fs');
 const path = require('node:path');
 
-const raiz = path.join(__dirname, '..');
-// Quebras de linha normalizadas para LF: com core.autocrlf (padrão no Git
-// para Windows) os arquivos chegam com CRLF, mas o conteúdo é o mesmo.
-const ler = (rel) => fs.readFileSync(path.join(raiz, rel), 'utf8').replace(/\r\n/g, '\n');
+const RAIZ = path.join(__dirname, '..');
+const DESTINO = path.join(RAIZ, 'js', 'generated', 'fallbacks.js');
+const PASTAS = [
+  { dir: 'partials', ext: '.html' },
+  { dir: 'pages', ext: '.html' },
+  { dir: 'json', ext: '.json' }
+];
 
-const nav = JSON.parse(ler('json/navegacao.json'));
-const arquivos = ['partials/header.html', 'partials/sidebar.html', 'json/usuario.json', 'json/navegacao.json'];
-for (const item of nav.itens) arquivos.push(item.arquivo, item.json);
-
-const fallbacks = {};
-for (const rel of new Set(arquivos)) {
-  const conteudo = ler(rel);
-  fallbacks[rel] = rel.endsWith('.json') ? JSON.parse(conteudo) : conteudo;
+function coletar() {
+  const mapa = {};
+  for (const { dir, ext } of PASTAS) {
+    const abs = path.join(RAIZ, dir);
+    if (!fs.existsSync(abs)) continue;
+    for (const nome of fs.readdirSync(abs).sort()) {
+      if (path.extname(nome) !== ext) continue;
+      const chave = `${dir}/${nome}`;
+      const texto = fs.readFileSync(path.join(abs, nome), 'utf8').replace(/\r\n/g, '\n');
+      mapa[chave] = ext === '.json' ? JSON.parse(texto) : texto;
+    }
+  }
+  return mapa;
 }
 
-const saida = `/**
- * ARQUIVO GERADO — não edite à mão. Rode \`npm run build:fallbacks\`.
- * Cópias das telas usadas quando o sistema é aberto via file://.
+function gerarConteudo() {
+  const mapa = coletar();
+  return `/**
+ * ARQUIVO GERADO AUTOMATICAMENTE — NÃO EDITE À MÃO.
+ * Origem: pages/, partials/ e json/. Para atualizar: npm run build
+ *
+ * Cópias embutidas usadas apenas quando o sistema é aberto via file://
+ * (sem servidor HTTP), onde o navegador bloqueia fetch() de arquivos locais.
  */
-window.APP_FALLBACKS = ${JSON.stringify(fallbacks, null, 2)};
+window.UPA_FALLBACKS = ${JSON.stringify(mapa, null, 2)};
 `;
-fs.writeFileSync(path.join(raiz, 'js', 'fallbacks.js'), saida);
-console.log(`js/fallbacks.js gerado com ${Object.keys(fallbacks).length} arquivos.`);
+}
+
+function gerar() {
+  fs.mkdirSync(path.dirname(DESTINO), { recursive: true });
+  fs.writeFileSync(DESTINO, gerarConteudo());
+  return DESTINO;
+}
+
+function estaAtualizado() {
+  if (!fs.existsSync(DESTINO)) return false;
+  return fs.readFileSync(DESTINO, 'utf8').replace(/\r\n/g, '\n') === gerarConteudo();
+}
+
+if (require.main === module) {
+  if (process.argv.includes('--check')) {
+    if (!estaAtualizado()) {
+      console.error('js/generated/fallbacks.js está desatualizado. Rode: npm run build');
+      process.exit(1);
+    }
+    console.log('fallbacks.js está atualizado.');
+  } else {
+    console.log('Gerado:', path.relative(RAIZ, gerar()));
+  }
+}
+
+module.exports = { gerar, gerarConteudo, estaAtualizado };

@@ -1,0 +1,60 @@
+<div class="page" id="page-exames">
+  <div class="page-hd">
+    <div>
+      <nav class="breadcrumb">Atendimento <span>›</span> <strong>Exames</strong></nav>
+      <h1 class="page-title">Exames</h1>
+      <p class="page-sub">Solicitações, prazos, laudos e resultados dos exames laboratoriais e de imagem.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-outline" id="btn-exportar-exames" type="button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Exportar
+      </button>
+      <button class="btn btn-primary" id="btn-solicitar-exame" type="button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Solicitar exame
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid" data-box="stats"></div>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="filters-row">
+        <div class="filter-group grow">
+          <label for="filter-exames-busca">Buscar</label>
+          <div class="search-input-wrap">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input class="filter-input" id="filter-exames-busca" type="search" placeholder="Cidadão, CPF ou tipo de exame">
+          </div>
+        </div>
+        <div class="filter-group">
+          <label for="filter-exames-status">Status</label>
+          <select class="filter-select" id="filter-exames-status">
+            <option value="">Todos</option>
+            <option>Solicitado</option><option>Em andamento</option><option>Concluído</option><option>Atrasado</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-exames-data-inicio">De</label>
+          <input class="filter-input" id="filter-exames-data-inicio" type="date">
+        </div>
+        <div class="filter-group">
+          <label for="filter-exames-data-fim">Até</label>
+          <input class="filter-input" id="filter-exames-data-fim" type="date">
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-ghost btn-sm" id="btn-limpar-exames" type="button">Limpar filtros</button>
+        </div>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Cidadão</th><th>Exame</th><th>Data</th><th>Unidade</th><th>Status</th><th class="col-acoes">Ações</th></tr></thead>
+        <tbody data-box="exames-tbody"></tbody>
+      </table>
+    </div>
+    <div class="pagination"><span class="page-info"></span><div class="page-btns"></div></div>
+  </div>
+</div>

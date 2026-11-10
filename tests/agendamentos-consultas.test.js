@@ -38,23 +38,24 @@ globalThis.ConsultasAPI = ConsultasAPI;
 window.AgendamentosAPI = AgendamentosAPI;
 window.ConsultasAPI = ConsultasAPI;
 
+// Data LOCAL no formato aaaa-mm-dd. Os testes antes usavam
+// toISOString().slice(0, 10), que devolve a data em UTC, junto com a hora
+// LOCAL (toTimeString). Em Brasília (UTC-3), entre 16h e 19h, "daqui a 5h"
+// virava "amanhã" em UTC e o teste de RN01 falhava sem o código estar errado.
+function dataLocal(d) {
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 // ==========================================
 // SUÍTE DE TESTES: Agendamentos, Consultas, RN01, RN02, RN03
 // ==========================================
-
-// Data no horário LOCAL, como a hora vinda de toTimeString(). Com toISOString()
-// a data saía em UTC e, à noite, virava o dia seguinte: "daqui a 5h" passava a
-// ser daqui a 29h e a RN01 deixava de barrar.
-function dataLocalISO(d) {
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
 
 test('1. AgendamentosAPI: RN01 - Bloquear solicitação com antecedência inferior a 24h', async (t) => {
   // Cria data para daqui a 5 horas
   const agora = new Date();
   const dataCurta = new Date(agora.getTime() + 5 * 3600 * 1000);
-  const dataStr = dataLocalISO(dataCurta);
+  const dataStr = dataLocal(dataCurta);
   const horaStr = dataCurta.toTimeString().slice(0, 5);
 
   const res = await window.AgendamentosAPI.solicitar({
@@ -62,7 +63,7 @@ test('1. AgendamentosAPI: RN01 - Bloquear solicitação com antecedência inferi
     cpf: '111.222.333-44',
     especialidade: 'Clínica Geral',
     medico: 'Dr. Teste RN01',
-    unidade: 'UPA Central 24h',
+    unidade: 'Unidade Centro',
     data: dataStr,
     hora: horaStr,
     tipo: 'Consulta Eletiva'
@@ -78,7 +79,7 @@ test('2. AgendamentosAPI: RN01 - Permitir solicitação com antecedência mínim
   // Cria data para daqui a 48 horas
   const agora = new Date();
   const dataValida = new Date(agora.getTime() + 48 * 3600 * 1000);
-  const dataStr = dataLocalISO(dataValida);
+  const dataStr = dataLocal(dataValida);
   const horaStr = '10:00';
 
   const res = await window.AgendamentosAPI.solicitar({
@@ -86,7 +87,7 @@ test('2. AgendamentosAPI: RN01 - Permitir solicitação com antecedência mínim
     cpf: '222.333.444-55',
     especialidade: 'Cardiologia',
     medico: 'Dr. Arnaldo Luiz',
-    unidade: 'UPA Central 24h',
+    unidade: 'Unidade Centro',
     data: dataStr,
     hora: horaStr,
     tipo: 'Consulta Eletiva'
@@ -101,7 +102,7 @@ test('2. AgendamentosAPI: RN01 - Permitir solicitação com antecedência mínim
 test('3. AgendamentosAPI: Conflito de Horário - Bloquear duplo agendamento para mesmo médico e horário', async (t) => {
   const agora = new Date();
   const dataValida = new Date(agora.getTime() + 72 * 3600 * 1000);
-  const dataStr = dataLocalISO(dataValida);
+  const dataStr = dataLocal(dataValida);
   const horaStr = '14:30';
   const medico = 'Dr. Manoel Joaquim';
 
@@ -111,7 +112,7 @@ test('3. AgendamentosAPI: Conflito de Horário - Bloquear duplo agendamento para
     cpf: '333.444.555-66',
     especialidade: 'Clínica Geral',
     medico: medico,
-    unidade: 'UPA Central 24h',
+    unidade: 'Unidade Centro',
     data: dataStr,
     hora: horaStr
   });
@@ -123,7 +124,7 @@ test('3. AgendamentosAPI: Conflito de Horário - Bloquear duplo agendamento para
     cpf: '444.555.666-77',
     especialidade: 'Clínica Geral',
     medico: medico,
-    unidade: 'UPA Sul',
+    unidade: 'Unidade Julia',
     data: dataStr,
     hora: horaStr
   });
@@ -135,14 +136,14 @@ test('3. AgendamentosAPI: Conflito de Horário - Bloquear duplo agendamento para
 test('4. AgendamentosAPI: Confirmar Agendamento', async (t) => {
   const agora = new Date();
   const dataValida = new Date(agora.getTime() + 96 * 3600 * 1000);
-  const dataStr = dataLocalISO(dataValida);
+  const dataStr = dataLocal(dataValida);
 
   const criacao = await window.AgendamentosAPI.solicitar({
     paciente: 'Paciente Confirmar',
     cpf: '555.666.777-88',
     especialidade: 'Pediatria',
     medico: 'Dra. Camila Torres',
-    unidade: 'UPA Central 24h',
+    unidade: 'Unidade Centro',
     data: dataStr,
     hora: '11:00'
   });
@@ -155,48 +156,52 @@ test('4. AgendamentosAPI: Confirmar Agendamento', async (t) => {
   assert.strictEqual(resConf.body.agendamento.status, 'Confirmado');
 });
 
-test('5. AgendamentosAPI: RN02 - Alteração por Cidadão com menos de 24h deve ser bloqueada', async (t) => {
-  // Criar agendamento próximo (mas acima de 24h para permitir criação inicial)
+test('5. AgendamentosAPI: Cidadão NUNCA altera agendamento (403) — só aceita ou recusa', async (t) => {
   const agora = new Date();
-  const dataValida = new Date(agora.getTime() + 26 * 3600 * 1000); // 26h à frente
-  const dataStr = dataLocalISO(dataValida);
-  const horaStr = dataValida.toTimeString().slice(0, 5);
-
+  const dataValida = new Date(agora.getTime() + 72 * 3600 * 1000);
   const criacao = await window.AgendamentosAPI.solicitar({
-    paciente: 'Cidadão RN02 Bloqueio',
+    paciente: 'Cidadão Sem Alteração',
     cpf: '666.777.888-99',
     especialidade: 'Ortopedia',
     medico: 'Dr. Carlos Mendes',
-    unidade: 'UPA Central 24h',
-    data: dataStr,
-    hora: horaStr
+    unidade: 'Unidade Centro',
+    data: dataLocal(dataValida),
+    hora: '08:00'
   });
   const agId = criacao.body.agendamento.id;
 
-  // Cidadão tenta alterar para uma data com apenas 10 horas de antecedência
-  const novaDataInvalida = new Date(agora.getTime() + 10 * 3600 * 1000);
+  const novaData = new Date(agora.getTime() + 120 * 3600 * 1000);
   const resAlt = await window.AgendamentosAPI.alterar({
     id: agId,
-    novaData: dataLocalISO(novaDataInvalida),
-    novaHora: novaDataInvalida.toTimeString().slice(0, 5),
+    novaData: dataLocal(novaData),
+    novaHora: '09:00',
     perfilSolicitante: 'Cidadão'
   });
-
-  assert.strictEqual(resAlt.status, 400, 'Deve barrar alteração pelo cidadão quando a antecedência for < 24h');
-  assert.strictEqual(resAlt.body.codigoRegra, 'RN02');
+  assert.strictEqual(resAlt.status, 403, 'Cidadão não pode alterar agendamento');
   assert.strictEqual(resAlt.body.success, false);
+
+  // Aceitar = confirmar
+  const resAceite = await window.AgendamentosAPI.confirmar({ id: agId });
+  assert.strictEqual(resAceite.status, 200);
+  assert.strictEqual(resAceite.body.agendamento.status, 'Confirmado');
+
+  // Recusar = cancelamento pelo cidadão (com 24h de antecedência)
+  const resRecusa = await window.AgendamentosAPI.cancelar({ id: agId, tipo: 'CIDADAO', perfilSolicitante: 'Cidadão' });
+  assert.strictEqual(resRecusa.status, 200);
+  assert.strictEqual(resRecusa.body.agendamento.status, 'Cancelado');
+  assert.strictEqual(resRecusa.body.agendamento.tipoCancelamento, 'CIDADAO');
 });
 
-test('6. AgendamentosAPI: RN02 - Alteração por Cidadão com mais de 24h deve ter sucesso', async (t) => {
+test('6. AgendamentosAPI: Recepção altera/remarca agendamento com sucesso', async (t) => {
   const agora = new Date();
   const dataInicial = new Date(agora.getTime() + 72 * 3600 * 1000);
   const criacao = await window.AgendamentosAPI.solicitar({
-    paciente: 'Cidadão RN02 Sucesso',
+    paciente: 'Cidadão Remarcado',
     cpf: '777.888.999-00',
     especialidade: 'Dermatologia',
     medico: 'Dra. Patrícia Souza',
-    unidade: 'UPA Central 24h',
-    data: dataLocalISO(dataInicial),
+    unidade: 'Unidade Julia',
+    data: dataLocal(dataInicial),
     hora: '15:00'
   });
   const agId = criacao.body.agendamento.id;
@@ -204,12 +209,12 @@ test('6. AgendamentosAPI: RN02 - Alteração por Cidadão com mais de 24h deve t
   const novaData = new Date(agora.getTime() + 96 * 3600 * 1000);
   const resAlt = await window.AgendamentosAPI.alterar({
     id: agId,
-    novaData: dataLocalISO(novaData),
+    novaData: dataLocal(novaData),
     novaHora: '16:00',
-    perfilSolicitante: 'Cidadão'
+    perfilSolicitante: 'Recepção'
   });
 
-  assert.strictEqual(resAlt.status, 200, 'Deve permitir alteração pelo cidadão com mais de 24h');
+  assert.strictEqual(resAlt.status, 200, 'Recepção deve conseguir alterar o agendamento');
   assert.strictEqual(resAlt.body.success, true);
   assert.strictEqual(resAlt.body.agendamento.status, 'Remarcado');
   assert.strictEqual(resAlt.body.agendamento.hora, '16:00');
@@ -223,8 +228,8 @@ test('7. AgendamentosAPI: RN03 - Cancelamento Administrativo exige justificativa
     cpf: '888.999.000-11',
     especialidade: 'Clínica Geral',
     medico: 'Dr. Manoel Joaquim',
-    unidade: 'UPA Central 24h',
-    data: dataLocalISO(dataValida),
+    unidade: 'Unidade Centro',
+    data: dataLocal(dataValida),
     hora: '09:00'
   });
   const agId = criacao.body.agendamento.id;
@@ -264,9 +269,9 @@ test('8. AgendamentosAPI: Listagem com Filtros (status, unidade, período)', asy
   });
 
   // Filtro por unidade
-  const unidadeSul = window.AgendamentosAPI.listar({ unidade: 'UPA Sul' });
+  const unidadeSul = window.AgendamentosAPI.listar({ unidade: 'Unidade Julia' });
   unidadeSul.data.forEach(item => {
-    assert.ok(item.unidade.includes('Sul'));
+    assert.ok(item.unidade.includes('Julia'));
   });
 
   // Indicadores
