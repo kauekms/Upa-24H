@@ -1,19 +1,20 @@
 /* Configurações, Meu Perfil e Cadastro de Usuários -------------------------- */
 .config-tabs {
-  display: flex; gap: 4px; padding: 6px; margin: 16px 20px 0;
-  background: var(--surface-3); border-radius: 12px; overflow-x: auto;
+  display: flex; gap: 0; padding: 0 12px;
+  background: var(--surface-2); border-bottom: 1px solid var(--border); overflow-x: auto;
 }
 .config-nav-item {
-  flex: 1; height: 36px; padding: 0 14px; border-radius: 9px; white-space: nowrap;
+  flex: 0 0 auto; height: 44px; padding: 0 14px; white-space: nowrap;
   font-size: 13px; font-weight: 600; color: var(--text-muted);
-  transition: all .15s;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color .15s, border-color .15s;
 }
 .config-nav-item:hover { color: var(--text); }
-.config-nav-item.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+.config-nav-item.active { color: var(--primary); border-bottom-color: var(--primary); }
 .config-body { padding: 20px; }
 .config-section { display: none; }
-.config-section.active { display: block; animation: fadeUp .18s var(--ease); }
-.config-section-titulo { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.config-section.active { display: block; animation: fadeIn .15s ease; }
+.config-section-titulo { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
 .config-section-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; }
 
 .config-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
@@ -26,33 +27,31 @@
   padding: 14px 0; border-bottom: 1px solid var(--border); cursor: pointer;
 }
 .toggle-row:last-child { border-bottom: none; }
-.toggle-info strong { display: block; font-size: 13.5px; }
+.toggle-info strong { display: block; font-size: 13.5px; font-weight: 600; }
 .toggle-info span { font-size: 12.5px; color: var(--text-muted); }
-.selo-em-breve { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 6px; font-size: 10.5px; font-weight: 700; background: var(--surface-3); color: var(--text-muted); vertical-align: middle; }
+.selo-em-breve { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: var(--radius-xs); font-size: 10.5px; font-weight: 600; background: var(--surface-3); color: var(--text-muted); border: 1px solid var(--border); vertical-align: middle; }
 
 /* Perfil */
 .perfil-capa {
-  height: 96px;
-  background:
-    radial-gradient(60% 140% at 100% 0%, rgba(16, 163, 90, .45), transparent 60%),
-    linear-gradient(120deg, #133aa3, #1f5eff);
+  height: 64px;
+  background: var(--sidebar);
 }
-.perfil-cabecalho { display: flex; align-items: flex-start; gap: 18px; padding: 0 24px 22px; margin-top: -44px; flex-wrap: wrap; }
+.perfil-cabecalho { display: flex; align-items: flex-start; gap: 18px; padding: 0 24px 20px; margin-top: -32px; flex-wrap: wrap; }
 .perfil-avatar {
-  position: relative; width: 96px; height: 96px; border-radius: 24px; flex-shrink: 0;
-  display: grid; place-items: center; font-size: 30px; font-weight: 800; color: #fff;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  position: relative; width: 80px; height: 80px; border-radius: var(--radius-lg); flex-shrink: 0;
+  display: grid; place-items: center; font-size: 26px; font-weight: 600; color: #fff;
+  background: #44505f;
   background-size: cover; background-position: center;
-  border: 4px solid var(--surface); box-shadow: var(--shadow-md);
+  border: 3px solid var(--surface); box-shadow: var(--shadow-sm);
 }
 .perfil-avatar-btn {
-  position: absolute; right: -6px; bottom: -6px; width: 32px; height: 32px; border-radius: 10px;
+  position: absolute; right: -6px; bottom: -6px; width: 28px; height: 28px; border-radius: var(--radius);
   display: grid; place-items: center; background: var(--surface); color: var(--text-2);
-  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-strong);
 }
-.perfil-avatar-btn:hover { color: var(--primary); }
-.perfil-identidade { flex: 1; min-width: 220px; padding-top: 56px; }
-.perfil-identidade h2 { font-size: 22px; font-weight: 800; letter-spacing: -.4px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.perfil-avatar-btn:hover { color: var(--primary); border-color: var(--primary); }
+.perfil-identidade { flex: 1; min-width: 220px; padding-top: 40px; }
+.perfil-identidade h2 { font-size: 20px; font-weight: 700; letter-spacing: -.2px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .perfil-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
 .info-lista { display: grid; }
@@ -62,19 +61,19 @@
 .info-lista dd { font-weight: 600; text-align: right; overflow-wrap: anywhere; }
 
 /* Cadastro de usuários */
-.profile-fields-section { border-top: 1px dashed var(--border-strong); padding-top: 18px; margin-top: 4px; animation: fadeUp .18s var(--ease); }
-.profile-fields-section h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--primary); margin-bottom: 14px; }
+.profile-fields-section { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 4px; animation: fadeIn .15s ease; }
+.profile-fields-section h4 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--text-muted); margin-bottom: 14px; }
 .form-acoes { display: flex; justify-content: flex-end; gap: 10px; padding-top: 18px; margin-top: 4px; border-top: 1px solid var(--border); }
 
 .users-busca { padding: 12px 16px; border-bottom: 1px solid var(--border); }
 .users-lista { max-height: 560px; overflow-y: auto; }
-.user-row { display: flex; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); transition: background .12s; }
+.user-row { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); transition: background .12s; }
 .user-row:last-child { border-bottom: none; }
 .user-row:hover { background: var(--surface-2); }
 .user-row-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .user-row-hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.user-row-hd strong { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-row-hd .badge { font-size: 11px; padding: 2px 8px; }
+.user-row-hd strong { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-row-hd .badge { font-size: 11px; padding: 0 7px; }
 
 @media (max-width: 640px) {
   .config-row { grid-template-columns: 1fr; }

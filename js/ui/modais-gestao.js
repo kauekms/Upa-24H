@@ -101,7 +101,7 @@ Object.assign(App, {
 
     const linhasInsumos = insumos.map(i => `
       <div class="insumo-row">
-        <span class="insumo-ico">${esc(i.icone || '📦')}</span>
+        <span class="insumo-ico">${Render.icone('caixa', 16)}</span>
         <div class="insumo-info"><div class="insumo-name">${esc(i.nome)}</div>
           <div class="prog-bar"><div class="prog-fill bar-${i.color === 'danger' ? 'red' : i.color === 'warning' ? 'orange' : 'green'}" style="width:${Number(i.pct) || 0}%"></div></div></div>
         <span class="insumo-pct text-${esc(i.color || 'primary')}">${Number(i.pct) || 0}%</span>

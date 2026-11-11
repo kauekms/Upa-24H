@@ -7,10 +7,10 @@
 Object.assign(App, {
   // Contas de demonstração exibidas como atalho de preenchimento.
   CONTAS_DEMO: [
-    { rotulo: 'Administrador', usuario: '111.444.777-35', senha: 'admin', icone: '🛡️' },
-    { rotulo: 'Profissional da Saúde', usuario: '222.555.888-46', senha: 'prof123', icone: '🩺' },
-    { rotulo: 'Recepção', usuario: '444.777.000-83', senha: 'recep123', icone: '🗂️' },
-    { rotulo: 'Cidadão', usuario: '333.666.999-57', senha: 'paciente123', icone: '👤' }
+    { rotulo: 'Administrador', usuario: '111.444.777-35', senha: 'admin' },
+    { rotulo: 'Profissional da Saúde', usuario: '222.555.888-46', senha: 'prof123' },
+    { rotulo: 'Recepção', usuario: '444.777.000-83', senha: 'recep123' },
+    { rotulo: 'Cidadão', usuario: '333.666.999-57', senha: 'paciente123' }
   ],
 
   showLoginOverlay() {
@@ -87,7 +87,7 @@ Object.assign(App, {
             <div class="login-demo-lista">
               ${this.CONTAS_DEMO.map(c => `
                 <button type="button" class="chip-demo" data-user="${Util.esc(c.usuario)}" data-pass="${Util.esc(c.senha)}">
-                  <span>${c.icone}</span>${Util.esc(c.rotulo)}
+                  ${Util.esc(c.rotulo)}
                 </button>`).join('')}
             </div>
           </div>

@@ -3,7 +3,7 @@
 .tipo-linha + .tipo-linha { border-top: 1px solid var(--border); }
 .tipo-linha span:nth-child(2) { flex: 1; }
 .tipo-linha strong { font-variant-numeric: tabular-nums; }
-.tipo-dot { width: 10px; height: 10px; border-radius: 4px; flex-shrink: 0; }
+.tipo-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
 
 .integridade-linha { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 13px; }
 .integridade-linha + .integridade-linha { border-top: 1px solid var(--border); }

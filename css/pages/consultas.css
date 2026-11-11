@@ -2,8 +2,8 @@
 .fila-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
 .fila-item:last-child { border-bottom: none; }
 .fila-num {
-  width: 28px; height: 28px; border-radius: 9px; flex-shrink: 0;
-  display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  width: 26px; height: 26px; border-radius: var(--radius-xs); flex-shrink: 0;
+  display: grid; place-items: center; font-size: 12px; font-weight: 700;
 }
 .fila-num.active { background: var(--primary); color: #fff; }
 .fila-num.wait { background: var(--surface-3); color: var(--text-2); }

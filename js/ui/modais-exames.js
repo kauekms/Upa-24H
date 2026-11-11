@@ -205,7 +205,7 @@ Object.assign(App, {
     const nome = historico[0]?.paciente || pacienteOuCpf || 'Cidadão';
 
     const corpo = historico.length === 0
-      ? '<div class="estado-vazio"><div class="estado-icone">🔬</div><span>Nenhum exame registrado para este cidadão.</span></div>'
+      ? `<div class="estado-vazio"><div class="estado-icone">${Render.icone('frasco')}</div><span>Nenhum exame registrado para este cidadão.</span></div>`
       : `<div class="tbl-wrap tbl-compacta"><table>
           <thead><tr><th>Exame</th><th>Tipo</th><th>Data</th><th>Unidade</th><th>Status</th></tr></thead>
           <tbody>${historico.map(e => {

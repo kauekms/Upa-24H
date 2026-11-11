@@ -28,7 +28,9 @@ const ICONES_STATS = {
   cama: '<path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/>',
   seringa: '<path d="m18 2 4 4M17 7l3-3M19 9 8.7 19.3a2.4 2.4 0 0 1-3.4 0l-.6-.6a2.4 2.4 0 0 1 0-3.4L15 5M9 11l4 4M5 19l-3 3M14 4l6 6"/>',
   escudo: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
-  caixa: '<path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>'
+  caixa: '<path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',
+  busca: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+  sino: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'
 };
 
 const ICONE_POR_EMOJI = {
@@ -38,15 +40,21 @@ const ICONE_POR_EMOJI = {
   '👤': 'chave', '🏥': 'hospital', '🔧': 'chave_inglesa', '🛏': 'cama', '💉': 'seringa', '🛡': 'escudo', '📦': 'caixa'
 };
 
-function iconeStat(emoji) {
-  const nome = ICONE_POR_EMOJI[String(emoji || '').trim()];
-  if (!nome) return esc(emoji || '');
-  return `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">${ICONES_STATS[nome]}</svg>`;
+/**
+ * Ícone de traço monocromático. Aceita o nome do ícone (ex.: 'alerta') ou um
+ * emoji antigo vindo dos dados (ex.: '📅'), que é convertido para o SVG
+ * equivalente. Valores desconhecidos são exibidos como texto escapado.
+ */
+function iconeStat(nomeOuEmoji, tamanho = 20) {
+  const chave = String(nomeOuEmoji || '').trim();
+  const nome = ICONES_STATS[chave] ? chave : ICONE_POR_EMOJI[chave];
+  if (!nome) return esc(nomeOuEmoji || '');
+  return `<svg width="${tamanho}" height="${tamanho}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">${ICONES_STATS[nome]}</svg>`;
 }
 
-function linhaVazia(colunas, mensagem, icone = '🔍') {
+function linhaVazia(colunas, mensagem, icone = 'busca') {
   return `<tr class="linha-vazia"><td colspan="${colunas}">
-    <div class="estado-vazio"><div class="estado-icone">${icone}</div><span>${esc(mensagem)}</span></div>
+    <div class="estado-vazio"><div class="estado-icone">${iconeStat(icone)}</div><span>${esc(mensagem)}</span></div>
   </td></tr>`;
 }
 
@@ -54,6 +62,11 @@ const Render = {
   _itensPorPagina: 10,
   _paginaAtual: {},
   _logsExibidos: [],
+
+  /** Ícone SVG monocromático por nome (ver ICONES_STATS). */
+  icone(nome, tamanho) {
+    return iconeStat(nome, tamanho);
+  },
 
   badge(status, cls) {
     return `<span class="badge ${esc(cls || 'b-gray')}">${esc(status)}</span>`;
@@ -437,7 +450,7 @@ const Render = {
       listaCompleta.forEach(c => { contagem[c.especialidade] = (contagem[c.especialidade] || 0) + 1; });
       const ordenado = Object.entries(contagem).sort((a, b) => b[1] - a[1]);
       const max = ordenado[0]?.[1] || 1;
-      const cores = ['var(--primary)', 'var(--accent)', 'var(--violet)', 'var(--warning)', 'var(--info)', 'var(--danger)'];
+      const cores = ['var(--primary)'];
       espEl.innerHTML = ordenado.length ? ordenado.slice(0, 6).map(([nome, n], i) => `
         <div class="barra-item">
           <div class="barra-hd"><span>${esc(nome)}</span><strong>${n}</strong></div>
@@ -540,7 +553,7 @@ const Render = {
                <div class="prog-wrap"><div class="prog-bar"><div class="prog-fill ${corOcup}" style="width:${ocupacao}%"></div></div><span class="prog-label">${ocupacao}%</span></div>`;
           return `
             <tr>
-              <td><div class="unidade-cell"><span class="unidade-icon">${esc(u.icone || '🏥')}</span><div><div class="fw-600">${esc(u.nome)}</div><div class="text-muted-sm">ID ${esc(u.id)}</div></div></div></td>
+              <td><div class="unidade-cell"><span class="unidade-icon">${iconeStat('hospital', 17)}</span><div><div class="fw-600">${esc(u.nome)}</div><div class="text-muted-sm">ID ${esc(u.id)}</div></div></div></td>
               <td><span class="type-chip tipo-${esc(String(u.tipo || '').toLowerCase())}">${esc(u.tipo)}</span></td>
               <td class="text-sm">${esc(u.endereco)}</td>
               <td style="min-width:150px">${capacidade}</td>
@@ -562,7 +575,7 @@ const Render = {
     if (insumosEl && Array.isArray(boxes.insumos)) {
       insumosEl.innerHTML = boxes.insumos.map(item => `
         <div class="insumo-row">
-          <span class="insumo-ico">${esc(item.icone || '📦')}</span>
+          <span class="insumo-ico">${iconeStat('caixa', 16)}</span>
           <div class="insumo-info">
             <div class="insumo-name">${esc(item.nome)}</div>
             <div class="prog-bar"><div class="prog-fill bar-${esc(item.color === 'danger' ? 'red' : item.color === 'warning' ? 'orange' : 'green')}" style="width:${Number(item.pct) || 0}%"></div></div>
@@ -575,7 +588,7 @@ const Render = {
     const distEl = root.querySelector('[data-box="distribuicao-rows"]');
     const listaTodas = window.App?.data?.unidades?.boxes?.lista || listaCompleta;
     if (distEl) {
-      const cores = { Hospital: 'var(--danger)', UPA: 'var(--warning)', UBS: 'var(--primary)', AME: 'var(--violet)' };
+      const cores = { Hospital: 'var(--primary)', UPA: '#5b7a99', UBS: '#8fa6bd', AME: 'var(--text-light)' };
       const contagem = {};
       listaTodas.forEach(u => { contagem[u.tipo] = (contagem[u.tipo] || 0) + 1; });
       distEl.innerHTML = Object.entries(contagem).map(([tipo, n]) => `
@@ -594,7 +607,7 @@ const Render = {
       ];
       alertasEl.innerHTML = alertas.length ? alertas.map(a => `
         <div class="alert-item nivel-${a.nivel}">
-          <span class="alert-ico">${a.nivel === 'critico' ? '⛔' : '⚠️'}</span>
+          <span class="alert-ico">${iconeStat('alerta', 16)}</span>
           <div class="alert-body"><strong>${esc(a.titulo)}</strong><p>${esc(a.descricao)}</p></div>
         </div>`).join('') : '<div class="estado-vazio compacto"><span>Nenhum alerta nas unidades.</span></div>';
     }
@@ -619,7 +632,7 @@ const Render = {
       blocos.push(`
         <div class="vax-alert-banner nivel-critico" role="alert">
           <div class="vax-alert-left">
-            <div class="vax-alert-icon">🚨</div>
+            <div class="vax-alert-icon">${iconeStat('alerta', 18)}</div>
             <div>
               <div class="vax-alert-title">Estoque de vacina esgotado (${criticos.length})</div>
               <div class="vax-alert-desc">Lotes com quantidade zero que precisam de reposição imediata:</div>
@@ -633,7 +646,7 @@ const Render = {
       blocos.push(`
         <div class="vax-alert-banner nivel-atencao" role="status">
           <div class="vax-alert-left">
-            <div class="vax-alert-icon">⚠️</div>
+            <div class="vax-alert-icon">${iconeStat('alerta', 18)}</div>
             <div>
               <div class="vax-alert-title">Baixo estoque de vacinas (${atencao.length})</div>
               <div class="vax-alert-desc">Lotes com quantidade igual ou abaixo do estoque mínimo:</div>
@@ -692,7 +705,7 @@ const Render = {
           const barClass = pct >= 75 ? 'bar-green' : (pct >= 40 ? 'bar-blue' : 'bar-orange');
           return `
             <tr>
-              <td><div class="unidade-cell"><span class="unidade-icon">${esc(c.icone || '💉')}</span><div><div class="fw-600">${esc(c.nome)}</div><div class="text-muted-sm">${esc(c.id || '')}</div></div></div></td>
+              <td><div class="unidade-cell"><span class="unidade-icon">${iconeStat('seringa', 17)}</span><div><div class="fw-600">${esc(c.nome)}</div><div class="text-muted-sm">${esc(c.id || '')}</div></div></div></td>
               <td class="fw-600">${esc(c.vacina)}</td>
               <td class="text-sm">${esc(c.publicoAlvo)}</td>
               <td class="mono text-sm">${esc(c.periodo)}</td>
@@ -768,7 +781,7 @@ const Render = {
 
     const { itens, atual, totalPaginas, total } = this.paginar(registros, 'logs');
     container.innerHTML = total === 0
-      ? '<div class="estado-vazio"><div class="estado-icone">📝</div><span>Nenhum registro encontrado para os filtros selecionados.</span></div>'
+      ? `<div class="estado-vazio"><div class="estado-icone">${iconeStat('documento')}</div><span>Nenhum registro encontrado para os filtros selecionados.</span></div>`
       : itens.map(r => `
         <button type="button" class="log-item" data-action="view-log" data-id="${esc(r.id)}">
           <span class="log-dot" style="background:${cores[r.dot] || 'var(--primary)'}"></span>

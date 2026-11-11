@@ -710,9 +710,14 @@ const App = {
     }
   },
 
+  /** Ícone SVG monocromático (delegado ao Render, que mantém o catálogo). */
+  icone(nome, tamanho) {
+    return window.Render?.icone ? window.Render.icone(nome, tamanho) : '';
+  },
+
   telaErro(mensagem, err) {
     return `<div class="estado-vazio estado-erro">
-      <div class="estado-icone">⚠️</div>
+      <div class="estado-icone">${App.icone('alerta')}</div>
       <strong>${Util.esc(mensagem)}</strong>
       <span>${Util.esc(err?.message || '')}</span>
     </div>`;
@@ -917,7 +922,7 @@ const App = {
     const alertas = this.alertasAtivos();
     const itens = alertas.map(a => `
       <div class="notif-item nivel-${a.nivel === 'critico' ? 'critico' : 'atencao'}">
-        <div class="notif-ico">${a.nivel === 'critico' ? '🚨' : '⚠️'}</div>
+        <div class="notif-ico">${this.icone('alerta', 18)}</div>
         <div>
           <strong>${Util.esc(a.titulo)}</strong>
           <p>${Util.esc(a.descricao || a.mensagem || '')}</p>
@@ -926,7 +931,7 @@ const App = {
 
     this.showModal({
       title: 'Notificações',
-      bodyHtml: `<div class="notif-lista">${itens || '<div class="estado-vazio"><div class="estado-icone">🔔</div><strong>Tudo em dia</strong><span>Nenhum alerta ativo no momento.</span></div>'}</div>`,
+      bodyHtml: `<div class="notif-lista">${itens || `<div class="estado-vazio"><div class="estado-icone">${this.icone('sino')}</div><strong>Tudo em dia</strong><span>Nenhum alerta ativo no momento.</span></div>`}</div>`,
       confirmText: null,
       cancelText: 'Fechar'
     });

@@ -1,24 +1,27 @@
 /* Vacinação: banners de alerta de estoque (também usados no Dashboard) ------ */
-.vax-alerts-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.vax-alerts-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
 .vax-alerts-container:empty { display: none; }
 
 .vax-alert-banner {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 14px 16px; border-radius: var(--radius-lg); border: 1px solid;
-  font-size: 13px; line-height: 1.5;
+  padding: 12px 16px; border-radius: var(--radius); border: 1px solid; border-left-width: 4px;
+  font-size: 13px; line-height: 1.5; background: var(--surface);
 }
-.vax-alert-banner.nivel-critico { background: var(--danger-50); border-color: #fbd0d0; color: #7f1d1d; }
-.vax-alert-banner.nivel-atencao { background: var(--warning-50); border-color: #fde3a7; color: #78350f; }
+.vax-alert-banner.nivel-critico { border-color: #f0cfcb; border-left-color: var(--danger); color: var(--text); }
+.vax-alert-banner.nivel-atencao { border-color: #ecd9b4; border-left-color: var(--warning); color: var(--text); }
 .vax-alert-left { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0; }
-.vax-alert-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-size: 16px; flex-shrink: 0; background: rgba(255, 255, 255, .7); }
-.vax-alert-title { font-weight: 700; font-size: 13.5px; }
-.vax-alert-desc { font-size: 12.5px; opacity: .85; }
+.vax-alert-icon { width: 28px; height: 28px; display: grid; place-items: center; flex-shrink: 0; }
+.vax-alert-icon svg { width: 18px; height: 18px; }
+.nivel-critico .vax-alert-icon, .nivel-critico .vax-alert-title { color: var(--danger-700); }
+.nivel-atencao .vax-alert-icon, .nivel-atencao .vax-alert-title { color: var(--warning-700); }
+.vax-alert-title { font-weight: 600; font-size: 13.5px; }
+.vax-alert-desc { font-size: 12.5px; color: var(--text-muted); }
 .vax-alert-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.vax-alert-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; background: rgba(255, 255, 255, .75); border: 1px solid; }
-.chip-critico { border-color: #f9b4b4; }
-.chip-atencao { border-color: #fcd679; }
-.btn-alerta-critico { background: #fff; border-color: #f9b4b4; color: var(--danger-700); }
-.btn-alerta-atencao { background: #fff; border-color: #fcd679; color: var(--warning-700); }
+.vax-alert-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-xs); font-size: 12px; font-weight: 500; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); }
+.chip-critico { border-color: #f0cfcb; }
+.chip-atencao { border-color: #ecd9b4; }
+.btn-alerta-critico { background: var(--surface); border-color: #e6bcb8; color: var(--danger-700); }
+.btn-alerta-atencao { background: var(--surface); border-color: #e2cc9f; color: var(--warning-700); }
 
 @media (max-width: 760px) {
   .vax-alert-banner { flex-direction: column; align-items: stretch; }
