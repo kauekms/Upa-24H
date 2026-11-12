@@ -26,6 +26,12 @@ Contas de demonstração (aparecem como atalhos na tela de login):
 | Recepção | 444.777.000-83 | recep123 |
 | Cidadão | 333.666.999-57 | paciente123 |
 
+> **Atenção:** estes perfis foram criados no início do projeto apenas para
+> desenvolvimento, testes e demonstração. Eles **não serão aplicados** caso o
+> projeto seja submetido a uma publicação efetiva: nesse cenário, as contas de
+> demonstração, suas senhas e os atalhos da tela de login devem ser removidos,
+> e os usuários reais passam a ser cadastrados pela administração do sistema.
+
 ## Regras por perfil
 
 | Ação | Administrador (testes) | Recepção | Profissional da Saúde | Cidadão |
@@ -64,6 +70,8 @@ tests/                  Testes unitários, E2E (tests/e2e) e suíte de navegador
 
 ## Observações
 
+- Os perfis de demonstração deixados no início do projeto (tabela acima) não
+  fazem parte de uma publicação efetiva e não devem ser levados para produção.
 - As regras de acesso (`js/config/permissoes.js`) são aplicadas apenas no
   navegador. Ao migrar para um servidor, elas precisam ser validadas também
   no backend.
