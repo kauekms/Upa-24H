@@ -1,0 +1,8 @@
+# UPA 24H no Apache (XAMPP): não listar pastas e não expor arquivos internos.
+Options -Indexes
+
+<FilesMatch "\.(sql|md|log|lock)$|^package(-lock)?\.json$">
+  Require all denied
+</FilesMatch>
+
+RedirectMatch 404 ^/[^/]+/(\.git|node_modules|tests|scripts|database|docs)(/|$)

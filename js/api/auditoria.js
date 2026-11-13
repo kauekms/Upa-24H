@@ -181,6 +181,7 @@ const AuditoriaService = (() => {
   function persist(lista) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+      window.Persistencia?.registrar(STORAGE_KEY, lista); // espelha no MySQL (XAMPP)
       // Sincroniza com estrutura de tela do App se estiver no browser
       if (typeof window !== 'undefined' && window.App?.data?.logs?.boxes) {
         window.App.data.logs.boxes.registros = lista;

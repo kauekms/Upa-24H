@@ -179,6 +179,7 @@ const ConsultasAPI = (() => {
   function persist(lista) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+      window.Persistencia?.registrar(STORAGE_KEY, lista); // espelha no MySQL (XAMPP)
       if (window.App?.data?.consultas?.boxes) {
         window.App.data.consultas.boxes.consultas = lista;
       }

@@ -105,6 +105,63 @@ test('Unidades: o sistema trabalha somente com "Unidade Centro" e "Unidade Julia
   assert.deepStrictEqual(unidadesJson, ['Unidade Centro', 'Unidade Julia']);
 });
 
+test('Banco: script com no mínimo 6 tabelas, relacionamentos N:N e 1:N por chave estrangeira', () => {
+  const ddl = ler('database/01_estrutura.sql');
+  const tabelas = [...ddl.matchAll(/CREATE TABLE (\w+)/g)].map(m => m[1]);
+  assert.ok(tabelas.length >= 6, `apenas ${tabelas.length} tabelas`);
+
+  // N:N: tabelas associativas com chave primária composta por duas FKs
+  for (const assoc of ['profissional_unidade', 'campanha_unidade']) {
+    const bloco = ddl.split(`CREATE TABLE ${assoc}`)[1].split(') ENGINE')[0];
+    assert.match(bloco, /PRIMARY KEY \(\w+_id, \w+_id\)/, `${assoc} sem chave composta`);
+    assert.strictEqual((bloco.match(/FOREIGN KEY/g) || []).length, 2, `${assoc} deveria ter 2 FKs`);
+  }
+  // 1:N: chaves estrangeiras nas tabelas filhas
+  assert.ok((ddl.match(/FOREIGN KEY/g) || []).length >= 20, 'poucas chaves estrangeiras');
+  assert.match(ddl, /fk_usuarios_perfil\s+FOREIGN KEY \(perfil_id\)\s+REFERENCES perfis/);
+  assert.match(ddl, /fk_agend_cidadao\s+FOREIGN KEY \(cidadao_id\)\s+REFERENCES cidadaos/);
+  assert.match(ddl, /fk_apl_lote\s+FOREIGN KEY \(lote_id\)\s+REFERENCES lotes/);
+});
+
+test('Banco: senhas das contas de demonstração gravadas como hash, nunca em texto', () => {
+  const dados = ler('database/02_dados.sql');
+  const senhas = [...dados.matchAll(/'(pbkdf2:[^']+|admin|prof123|recep123|paciente123)'/g)].map(m => m[1]);
+  assert.strictEqual(senhas.length, 4);
+  assert.ok(senhas.every(s => s.startsWith('pbkdf2:100000:')), 'senha em texto puro no script');
+});
+
+test('Backend: orientado a objetos, com os 3 relatórios (2 mestre-detalhe com JOIN)', () => {
+  const src = path.join(RAIZ, 'backend', 'src');
+  const lerSrc = rel => fs.readFileSync(path.join(src, rel), 'utf8');
+  assert.match(lerSrc('Modelo/Entidade.php'), /abstract class Entidade/);
+  for (const m of ['Usuario', 'Agendamento', 'Consulta', 'Exame', 'Campanha', 'Lote', 'AplicacaoVacina', 'LogAuditoria']) {
+    assert.match(lerSrc(`Modelo/${m}.php`), new RegExp(`final class ${m} extends Entidade`), `${m} não herda de Entidade`);
+  }
+  assert.match(lerSrc('Repositorio/Repositorio.php'), /abstract class Repositorio/);
+  assert.match(lerSrc('Relatorio/Relatorio.php'), /abstract class Relatorio/);
+  const relatorios = ['RelatorioFichaCidadao', 'RelatorioAgendamentos', 'RelatorioEstoqueVacinas'];
+  for (const r of relatorios) {
+    const codigo = lerSrc(`Relatorio/${r}.php`);
+    assert.match(codigo, /extends Relatorio/);
+    assert.match(codigo, /\bJOIN\b/, `${r} sem junção de tabelas`);
+  }
+  assert.match(lerSrc('Relatorio/RelatorioFichaCidadao.php'), /MESTRE-DETALHE/);
+  assert.match(lerSrc('Relatorio/RelatorioEstoqueVacinas.php'), /MESTRE-DETALHE/);
+  assert.match(lerSrc('Seguranca/ControleAcesso.php'), /exigirRelatorios/);
+});
+
+test('Persistência: todo módulo que salva dados localmente espelha no banco', () => {
+  for (const f of ['agendamentos', 'consultas', 'exames', 'auditoria', 'usuarios']) {
+    assert.match(ler(`js/api/${f}.js`), /Persistencia\?\.registrar\(STORAGE_KEY, lista\)/, `${f}.js não envia ao banco`);
+  }
+  const vac = ler('js/api/vacinacao.js');
+  for (const k of ['STORAGE_MINIMOS', 'STORAGE_CAMPANHAS', 'STORAGE_ESTOQUE', 'STORAGE_APLICACOES']) {
+    assert.ok(vac.includes(`Persistencia?.registrar(${k},`), `vacinacao.js não envia ${k}`);
+  }
+  assert.ok(ler('index.html').indexOf('js/api/persistencia.js') < ler('index.html').indexOf('js/api/usuarios.js'),
+    'persistencia.js deve carregar antes dos módulos de API');
+});
+
 test('Permissões: laudo só por Profissional da Saúde e Administrador; Recepção registra vacinação', () => {
   global.window = global;
   const Permissoes = require('../js/config/permissoes.js');

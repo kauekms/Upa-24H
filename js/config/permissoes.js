@@ -53,9 +53,9 @@ const Permissoes = (() => {
   // 'configuracoes' e 'perfil' não entram aqui de propósito: são acessíveis
   // a qualquer usuário autenticado (ficam fora do menu principal).
   const PAGINAS_POR_PERFIL = {
-    'Administrador': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades', 'logs', 'cadastro-usuarios'],
-    'Profissional da Saúde': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades'],
-    'Recepção': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao'],
+    'Administrador': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades', 'relatorios', 'logs', 'cadastro-usuarios'],
+    'Profissional da Saúde': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades', 'relatorios'],
+    'Recepção': ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'relatorios'],
     // Cidadão e Paciente têm a mesma visão restrita: autoatendimento de
     // agendamentos, consultas e exames próprios.
     'Cidadão': ['agendamentos', 'consultas', 'exames'],

@@ -1,0 +1,2 @@
+# Classes do backend: só são carregadas por api.php e relatorio.php.
+Require all denied

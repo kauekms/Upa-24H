@@ -3,6 +3,7 @@
     { "id": "geral", "label": "Visão geral" },
     { "id": "atendimento", "label": "Atendimento" },
     { "id": "saude", "label": "Saúde pública" },
+    { "id": "gestao", "label": "Gestão" },
     { "id": "admin", "label": "Administração" }
   ],
   "itens": [
@@ -12,6 +13,7 @@
     { "id": "exames", "label": "Exames", "secao": "atendimento", "arquivo": "pages/exames.html", "json": "json/exames.json" },
     { "id": "vacinacao", "label": "Vacinação", "secao": "saude", "arquivo": "pages/vacinacao.html", "json": "json/vacinacao.json" },
     { "id": "unidades", "label": "Unidades de Saúde", "secao": "saude", "arquivo": "pages/unidades.html", "json": "json/unidades.json" },
+    { "id": "relatorios", "label": "Relatórios", "secao": "gestao", "arquivo": "pages/relatorios.html", "json": "json/relatorios.json" },
     { "id": "logs", "label": "Logs de Sistema", "secao": "admin", "arquivo": "pages/logs.html", "json": "json/logs.json" },
     { "id": "cadastro-usuarios", "label": "Cadastro de Usuários", "secao": "admin", "arquivo": "pages/cadastro-usuarios.html", "json": "json/cadastro-usuarios.json" },
     { "id": "configuracoes", "label": "Configurações", "arquivo": "pages/configuracoes.html", "json": "json/configuracoes.json" },

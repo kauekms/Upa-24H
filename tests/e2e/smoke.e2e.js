@@ -23,13 +23,13 @@ const CAPTURAS = process.env.SCREENSHOTS_DIR ? path.resolve(process.env.SCREENSH
 
 const PERFIS = [
   { nome: 'Administrador', usuario: '111.444.777-35', senha: 'admin',
-    telas: ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades', 'logs', 'cadastro-usuarios', 'configuracoes', 'perfil'] },
+    telas: ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades', 'relatorios', 'logs', 'cadastro-usuarios', 'configuracoes', 'perfil'] },
   { nome: 'Profissional', usuario: '222.555.888-46', senha: 'prof123',
-    telas: ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades', 'perfil'], negadas: ['logs', 'cadastro-usuarios'] },
+    telas: ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'unidades', 'relatorios', 'perfil'], negadas: ['logs', 'cadastro-usuarios'] },
   { nome: 'Recepção', usuario: '444.777.000-83', senha: 'recep123',
-    telas: ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao'], negadas: ['unidades', 'logs'] },
+    telas: ['dashboard', 'agendamentos', 'consultas', 'exames', 'vacinacao', 'relatorios'], negadas: ['unidades', 'logs'] },
   { nome: 'Cidadão', usuario: '333.666.999-57', senha: 'paciente123',
-    telas: ['agendamentos', 'consultas', 'exames', 'perfil'], negadas: ['dashboard', 'logs'] }
+    telas: ['agendamentos', 'consultas', 'exames', 'perfil'], negadas: ['dashboard', 'logs', 'relatorios'] }
 ];
 
 let falhas = 0;

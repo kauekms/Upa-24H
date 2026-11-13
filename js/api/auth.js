@@ -406,6 +406,15 @@ const AuthAPI = (() => {
   }
 
   async function login(identificador, senha) {
+    // Com o backend do XAMPP ativo, a senha é validada primeiro no MySQL e os
+    // dados do perfil são carregados do banco antes de abrir a sessão local.
+    const servidor = window.Persistencia?.online ? window.Persistencia : null;
+    if (servidor) {
+      const r = await servidor.login(identificador, senha);
+      if (!r.ok) return { status: r.status, body: r.body };
+      await servidor.carregar();
+    }
+
     const url = USE_MOCK_API ? '/auth/login' : `${API_BASE_URL}/auth/login`;
     const res = await fetch(url, {
       method: 'POST',
@@ -418,11 +427,14 @@ const AuthAPI = (() => {
       if (body.user) {
         localStorage.setItem('upa_usuario', JSON.stringify(body.user));
       }
+    } else if (servidor) {
+      await servidor.logout();
     }
     return { status: res.status, body };
   }
 
   async function logout() {
+    await window.Persistencia?.logout?.();
     const token = getTokenLocal();
     const url = USE_MOCK_API ? '/auth/logout' : `${API_BASE_URL}/auth/logout`;
     const headers = { 'Content-Type': 'application/json' };
@@ -439,6 +451,16 @@ const AuthAPI = (() => {
   async function restaurarSessao() {
     const token = getTokenLocal();
     if (!token) return null;
+    // Sessão do servidor expirada (ou ausente): exige novo login.
+    if (window.Persistencia?.online) {
+      const doServidor = await window.Persistencia.me();
+      if (!doServidor) {
+        setTokenLocal(null);
+        localStorage.removeItem('upa_usuario');
+        return null;
+      }
+      await window.Persistencia.carregar();
+    }
     const url = USE_MOCK_API ? '/auth/me' : `${API_BASE_URL}/auth/me`;
     try {
       const res = await fetch(url, {

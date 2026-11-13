@@ -45,7 +45,7 @@ const ExamesAPI = (() => {
       {
         id: '#EX-8821',
         paciente: 'Carlos Braga',
-        cpf: '123.456.789-00',
+        cpf: '135.792.468-00',
         pid: 'P-4521',
         tipo: 'Hemograma Completo',
         solicitante: 'Dr. Arnaldo Luiz',
@@ -61,7 +61,7 @@ const ExamesAPI = (() => {
       {
         id: '#EX-8822',
         paciente: 'Luciana Ferreira',
-        cpf: '987.654.321-00',
+        cpf: '123.456.789-00',
         pid: 'P-4318',
         tipo: 'Glicemia em Jejum',
         solicitante: 'Dr. Manoel Joaquim',
@@ -143,7 +143,7 @@ const ExamesAPI = (() => {
       {
         id: '#EX-8805',
         paciente: 'Carlos Braga',
-        cpf: '123.456.789-00',
+        cpf: '135.792.468-00',
         pid: 'P-4521',
         tipo: 'Colesterol Total e Frações',
         solicitante: 'Dr. Arnaldo Luiz',
@@ -180,6 +180,7 @@ const ExamesAPI = (() => {
   function persist(lista) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+      window.Persistencia?.registrar(STORAGE_KEY, lista); // espelha no MySQL (XAMPP)
       if (typeof window !== 'undefined' && window.App?.data?.exames?.boxes) {
         window.App.data.exames.boxes.lista = lista;
       }

@@ -1,0 +1,18 @@
+/* Relatórios gerenciais ------------------------------------------------------ */
+.relatorios-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
+.relatorio-card { display: flex; flex-direction: column; }
+.relatorio-card .card-header { align-items: flex-start; flex-wrap: nowrap; }
+.relatorio-card .card-body { flex: 1; }
+.relatorio-tabelas {
+  margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--border);
+  font-size: 11.5px; color: var(--text-muted); line-height: 1.5;
+}
+.relatorio-acoes { display: flex; justify-content: flex-end; padding: 12px 20px; border-top: 1px solid var(--border); background: var(--surface-2); }
+
+@media (max-width: 1200px) {
+  .relatorios-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px) {
+  .relatorios-grid { grid-template-columns: 1fr; }
+  .relatorio-card .card-header { flex-wrap: wrap; }
+}

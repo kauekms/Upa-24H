@@ -1,0 +1,4 @@
+# Arquivos internos: carregados pelo api.php / relatorio.php
+<FilesMatch "^(config|bootstrap)\.php$">
+  Require all denied
+</FilesMatch>

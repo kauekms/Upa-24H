@@ -202,6 +202,7 @@ const UsuariosAPI = (() => {
 
   function persist(lista) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+      window.Persistencia?.registrar(STORAGE_KEY, lista); // espelha no MySQL (XAMPP)
   }
 
   /**

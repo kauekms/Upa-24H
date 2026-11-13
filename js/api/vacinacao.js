@@ -204,7 +204,7 @@ const VacinacaoAPI = (() => {
         id: 'APL-1001',
         cidadao: 'Paulo Henrique',
         paciente: 'Paulo Henrique',
-        cpf: '123.456.789-00',
+        cpf: '246.813.579-00',
         vacina: 'COVID-19 (Bivalente)',
         campanha: 'Campanha Nacional COVID-19',
         lote: 'LOT-COV-2026A',
@@ -343,6 +343,7 @@ const VacinacaoAPI = (() => {
   function persistMinimos(minimos) {
     try {
       localStorage.setItem(STORAGE_MINIMOS, JSON.stringify(minimos));
+      window.Persistencia?.registrar(STORAGE_MINIMOS, minimos); // espelha no MySQL (XAMPP)
     } catch (e) {
       console.error('Erro ao salvar estoque mínimo de vacinas:', e);
     }
@@ -395,6 +396,7 @@ const VacinacaoAPI = (() => {
   function persistCampanhas(lista) {
     try {
       localStorage.setItem(STORAGE_CAMPANHAS, JSON.stringify(lista));
+      window.Persistencia?.registrar(STORAGE_CAMPANHAS, lista); // espelha no MySQL (XAMPP)
     } catch (e) {
       console.error('Erro ao persistir campanhas:', e);
     }
@@ -420,6 +422,7 @@ const VacinacaoAPI = (() => {
   function persistEstoque(lista) {
     try {
       localStorage.setItem(STORAGE_ESTOQUE, JSON.stringify(lista));
+      window.Persistencia?.registrar(STORAGE_ESTOQUE, lista); // espelha no MySQL (XAMPP)
       sincronizarAppData();
     } catch (e) {
       console.error('Erro ao persistir estoque de vacinas:', e);
@@ -446,6 +449,7 @@ const VacinacaoAPI = (() => {
   function persistAplicacoes(lista) {
     try {
       localStorage.setItem(STORAGE_APLICACOES, JSON.stringify(lista));
+      window.Persistencia?.registrar(STORAGE_APLICACOES, lista); // espelha no MySQL (XAMPP)
       sincronizarAppData();
     } catch (e) {
       console.error('Erro ao persistir aplicações de vacinas:', e);

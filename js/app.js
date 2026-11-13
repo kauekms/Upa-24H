@@ -54,7 +54,11 @@ const App = {
       window.AuthAPI?.registrarInterceptor();
       window.UsuariosAPI?.registrarInterceptor();
       window.VacinacaoAPI?.registrarInterceptor();
+      // Backend PHP + MySQL (XAMPP) disponível? Se sim, login e dados passam pelo banco.
+      const bancoOnline = await window.Persistencia?.iniciar?.();
       await this.loadPartials();
+      const versao = document.querySelector('.sidebar-versao');
+      if (versao) versao.textContent += bancoOnline ? ' · Banco MySQL conectado' : ' · Modo local (sem banco)';
 
       this.navegacao = await this.fetchJson('json/navegacao.json');
       this.carregarCache();
@@ -496,6 +500,7 @@ const App = {
     vacinacao: '<path d="m18 2 4 4M17 7l3-3M19 9 8.7 19.3a2.4 2.4 0 0 1-3.4 0l-.6-.6a2.4 2.4 0 0 1 0-3.4L15 5M9 11l4 4M5 19l-3 3M14 4l6 6"/>',
     unidades: '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-4h6v4M10 9h4M12 7v4"/>',
     logs: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>',
+    relatorios: '<path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-3"/>',
     'cadastro-usuarios': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>'
   },
 
@@ -1191,6 +1196,10 @@ const App = {
         Render.renderUnidades(root, { boxes: { ...this.data.unidades.boxes, lista } });
       };
       ligarFiltros(['#filter-unidades-busca', '#filter-unidades-tipo', '#filter-unidades-status'], filtrar, '#btn-limpar-unidades');
+    }
+
+    if (pageId === 'relatorios') {
+      this.configurarRelatorios(root);
     }
 
     if (pageId === 'logs') {

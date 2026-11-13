@@ -1,0 +1,98 @@
+<div class="page" id="page-relatorios">
+  <div class="page-hd">
+    <div>
+      <nav class="breadcrumb">Gestão <span>›</span> <strong>Relatórios</strong></nav>
+      <h1 class="page-title">Relatórios gerenciais</h1>
+      <p class="page-sub">Documentos gerados diretamente do banco de dados MySQL, prontos para impressão ou PDF.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-warning" data-box="relatorios-offline" hidden>
+    <strong>Banco de dados não conectado.</strong> Os relatórios são gerados pelo servidor PHP com MySQL.
+    Ligue o Apache e o MySQL no XAMPP e acesse o sistema por <span class="mono">http://localhost/upa24h/</span>.
+  </div>
+
+  <div class="relatorios-grid">
+    <form class="card relatorio-card" data-relatorio="ficha-cidadao" novalidate>
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Ficha de atendimento do cidadão</h2>
+          <p class="card-sub">Mestre-detalhe: o cidadão e, abaixo, seus agendamentos, exames e vacinas.</p>
+        </div>
+        <span class="badge b-blue">Mestre-detalhe</span>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label for="rel-ficha-cpf">CPF <span class="opcional">(opcional)</span></label>
+          <input id="rel-ficha-cpf" name="cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label for="rel-ficha-nome">Nome contém <span class="opcional">(opcional)</span></label>
+          <input id="rel-ficha-nome" name="nome" type="text" placeholder="Ex.: Silva">
+        </div>
+        <p class="relatorio-tabelas">Tabelas: cidadaos · usuarios · agendamentos · exames · aplicacoes_vacina · profissionais · especialidades · unidades · tipos_exame · lotes · vacinas</p>
+      </div>
+      <div class="relatorio-acoes"><button class="btn btn-primary" type="submit">Gerar relatório</button></div>
+    </form>
+
+    <form class="card relatorio-card" data-relatorio="agendamentos" novalidate>
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Agendamentos por período</h2>
+          <p class="card-sub">Lista com cidadão, profissional e unidade, com totais por status e por unidade.</p>
+        </div>
+        <span class="badge b-gray">Junção + totais</span>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="rel-ag-inicio">De</label>
+            <input id="rel-ag-inicio" name="inicio" type="date">
+          </div>
+          <div class="form-group">
+            <label for="rel-ag-fim">Até</label>
+            <input id="rel-ag-fim" name="fim" type="date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="rel-ag-unidade">Unidade</label>
+          <select id="rel-ag-unidade" name="unidade" data-opcoes="unidades"></select>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="rel-ag-profissional">Profissional</label>
+            <select id="rel-ag-profissional" name="profissional" data-opcoes="profissionais"></select>
+          </div>
+          <div class="form-group">
+            <label for="rel-ag-status">Status</label>
+            <select id="rel-ag-status" name="status" data-opcoes="status"></select>
+          </div>
+        </div>
+        <p class="relatorio-tabelas">Tabelas: agendamentos · cidadaos · profissionais · especialidades · unidades</p>
+      </div>
+      <div class="relatorio-acoes"><button class="btn btn-primary" type="submit">Gerar relatório</button></div>
+    </form>
+
+    <form class="card relatorio-card" data-relatorio="estoque-vacinas" novalidate>
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Estoque de vacinas por lote</h2>
+          <p class="card-sub">Mestre-detalhe: cada lote com a situação do estoque e as doses aplicadas dele.</p>
+        </div>
+        <span class="badge b-blue">Mestre-detalhe</span>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label for="rel-est-unidade">Unidade</label>
+          <select id="rel-est-unidade" name="unidade" data-opcoes="unidades"></select>
+        </div>
+        <div class="form-group">
+          <label for="rel-est-vacina">Vacina</label>
+          <select id="rel-est-vacina" name="vacina" data-opcoes="vacinas"></select>
+        </div>
+        <p class="relatorio-tabelas">Tabelas: lotes · vacinas · unidades · aplicacoes_vacina · cidadaos · profissionais</p>
+      </div>
+      <div class="relatorio-acoes"><button class="btn btn-primary" type="submit">Gerar relatório</button></div>
+    </form>
+  </div>
+</div>

@@ -33,6 +33,11 @@ http.createServer((req, res) => {
     return;
   }
   let arquivo = path.normalize(path.join(RAIZ, caminho));
+  // O backend PHP só roda no Apache do XAMPP: aqui nunca servimos o código-fonte dele.
+  if (/^/(backend|database)(/|$)/.test(caminho) || /.(php|sql)$/i.test(caminho)) {
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('Não encontrado');
+    return;
+  }
   if (!arquivo.startsWith(RAIZ)) {
     res.writeHead(403).end('Acesso negado');
     return;

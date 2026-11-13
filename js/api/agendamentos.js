@@ -82,6 +82,7 @@ const AgendamentosAPI = (() => {
   function persist(lista) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+      window.Persistencia?.registrar(STORAGE_KEY, lista); // espelha no MySQL (XAMPP)
       if (window.App?.data?.agendamentos?.boxes) {
         window.App.data.agendamentos.boxes.lista = lista;
       }
